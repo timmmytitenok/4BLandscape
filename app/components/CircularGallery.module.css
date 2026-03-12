@@ -1,0 +1,16 @@
+.circularGallery {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  cursor: grab;
+}
+
+.circularGallery canvas {
+  position: relative;
+  z-index: 1;
+}
+
+.circularGallery:active {
+  cursor: grabbing;
+}

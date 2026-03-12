@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "4BLandscape",
+  title: "4B Landscape",
   description:
     "Reliable lawn care, mulch installation, yard cleanups and more for homes across Columbus and surrounding areas. Call for a free quote.",
 };

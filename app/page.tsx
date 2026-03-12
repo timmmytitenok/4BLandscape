@@ -1,135 +1,104 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import CircularGallery from "./components/CircularGallery";
+import LightRays from "./components/LightRays";
+const CircularGalleryAny = CircularGallery as any;
 
 const SERVICE_CATEGORIES = [
   {
-    title: "Lawn Care",
+    title: "Services",
     services: [
-      { name: "Lawn Mowing", Icon: LawnIcon, description: "Keep your lawn clean and neatly maintained." },
-      { name: "Edging", Icon: EdgingIcon, description: "Clean, crisp edges along walkways and beds." },
-      { name: "Seasonal Cleanups", Icon: SeasonalIcon, description: "Spring and fall yard preparation." },
-      { name: "Leaf Removal", Icon: LeafIcon, description: "Thorough leaf removal and disposal." },
-    ],
-  },
-  {
-    title: "Landscaping",
-    services: [
-      { name: "Mulch Installation", Icon: MulchIcon, description: "Fresh mulch for beds and borders." },
-      { name: "Sod Installation", Icon: SodIcon, description: "New lawn installation and repair." },
-      { name: "Shrub Planting", Icon: ShrubIcon, description: "Professional shrub and plant installation." },
-      { name: "General Landscaping", Icon: LandscapeIcon, description: "Full landscape design and installation." },
-    ],
-  },
-  {
-    title: "Yard Maintenance",
-    services: [
-      { name: "Yard Cleanups", Icon: CleanupIcon, description: "Complete yard cleanup and debris removal." },
-      { name: "Bush Trimming", Icon: BushIcon, description: "Expert bush shaping and maintenance." },
-      { name: "Hedge Trimming", Icon: HedgeIcon, description: "Neat, even hedge trimming." },
-      { name: "Flower Bed Cleanup", Icon: FlowerIcon, description: "Weeding and bed maintenance." },
-    ],
-  },
-  {
-    title: "Property Improvements",
-    services: [
-      { name: "Fence Installation", Icon: FenceIcon, description: "Quality fence installation and repair." },
-      { name: "Gravel Delivery", Icon: GravelIcon, description: "Gravel and stone delivery for driveways and paths." },
-      { name: "Soil Delivery", Icon: SoilIcon, description: "Topsoil and fill dirt delivery." },
-      { name: "Mulch Delivery", Icon: MulchIcon, description: "Bulk mulch delivery for beds and landscaping projects." },
+      { name: "Mulching", Icon: MulchIcon, description: "Fresh mulch installation for clean beds." },
+      { name: "Sod Installation", Icon: SodIcon, description: "New sod installation and lawn replacement." },
+      { name: "Grass Seeding", Icon: LawnIcon, description: "Overseeding and new seed application for thicker lawns." },
+      { name: "Brick Edging", Icon: EdgingIcon, description: "Crisp brick edging for beds and walkways." },
+      { name: "Lawn Mowing", Icon: LawnIcon, description: "Routine mowing for clean, even lawns." },
+      { name: "Tree Services", Icon: SeasonalIcon, description: "General trimming and tree service support." },
+      { name: "Land Clearing", Icon: CleanupIcon, description: "Brush and debris clearing for open usable space." },
+      { name: "Fence Installation", Icon: FenceIcon, description: "Fence installation and property boundary upgrades." },
+      { name: "Patio Builds", Icon: LandscapeIcon, description: "Patio installations for outdoor living spaces." },
+      { name: " Gravel/Mulch Deliveries", Icon: GravelIcon, description: "Bulk material delivery to your property." },
     ],
   },
 ];
 
-const PHONE = "tel:6140000000";
-const PHONE_DISPLAY = "(614) 000-0000";
+const SERVICE_GALLERY_ITEMS = SERVICE_CATEGORIES.flatMap((category) =>
+  category.services.map((service) => {
+    return {
+      image:
+        service.name.trim() === "Mulching"
+          ? "/gallery/mulching.png"
+          : service.name.trim() === "Brick Edging"
+            ? "/gallery/brick-edging.png"
+            : service.name.trim() === "Sod Installation"
+              ? "/gallery/sod-installation.png"
+              : service.name.trim() === "Lawn Mowing"
+                ? "/gallery/lawn-mowing.png"
+                : service.name.trim() === "Gravel/Mulch Deliveries"
+                  ? "/gallery/gravel-mulch-deliveries.png"
+              : "/gallery/service-placeholder.svg",
+      text: service.name,
+    };
+  })
+);
 
-const beforeAfterProjects = [
-  {
-    before: "/gallery/IMG_5172-1aa29f5a-c6fa-4502-b946-a8cfe3bafd4b.png",
-    after: "/gallery/IMG_5157-3e170bf1-355a-46d3-b075-d73db83ec244.png",
-    label: "Yard Cleanup",
-  },
-  {
-    before: "/gallery/IMG_5282-cd51159c-0137-4952-bc3a-122c32891b44.png",
-    after: "/gallery/IMG_5238-5abbf5c2-213c-40bd-8451-217df547978e.png",
-    label: "Mulch Refresh",
-  },
-  {
-    before: "/gallery/IMG_1357-cd7a7abd-fbac-4e64-83a6-543008cb5e1b.png",
-    after: "/gallery/IMG_2199-0bed0a76-5ec3-434e-b18d-c3e8c1a5dcd2.png",
-    label: "Lawn Improvement",
-  },
-];
+const PHONE = "tel:6148932918";
+const PHONE_DISPLAY = "(614) 893-2918";
 
-const TRUST_POINTS = [
-  {
-    title: "Locally Owned",
-    description:
-      "Proudly serving Columbus and surrounding communities with dependable local service.",
-  },
-  {
-    title: "Reliable Scheduling",
-    description:
-      "We show up on time, communicate clearly, and keep your project moving.",
-  },
-  {
-    title: "Quality Work",
-    description:
-      "From routine maintenance to full yard improvements, we focus on clean, professional results.",
-  },
-  {
-    title: "Fast Quotes",
-    description: "Call or message us for a quick estimate and easy scheduling.",
-  },
-  {
-    title: "Professional Equipment",
-    description:
-      "We use the right tools and equipment to work efficiently and get the job done right.",
-  },
-  {
-    title: "Friendly Service",
-    description:
-      "Easy communication, honest work, and a team that cares about the final result.",
-  },
+const WHY_CHOOSE_BENEFITS = [
+  "Locally owned Columbus landscaping team",
+  "Reliable scheduling and clear communication",
+  "Clean, professional landscaping work",
+  "Fast quotes and simple scheduling",
+  "Professional tools and equipment",
+  "Friendly and dependable service",
 ];
 
 const SERVICE_AREAS = [
   "Columbus",
-  "Hilliard",
   "Dublin",
-  "Grove City",
-  "Upper Arlington",
+  "Hilliard",
   "Galloway",
-  "West Jefferson",
-  "Plain City",
+  "Grove City",
+  "Worthington",
+  "Upper Arlington",
+  "German Village",
 ];
 
-const HOW_IT_WORKS_STEPS = [
-  {
-    title: "Call or Request a Quote",
-    description: "Tell us about your yard, cleanup, or landscaping project.",
-  },
-  {
-    title: "Get a Fast Estimate",
-    description: "We'll provide a quick quote and schedule a time that works for you.",
-  },
-  {
-    title: "We Get to Work",
-    description: "Our team gets the job done with clean, professional results.",
-  },
+const NAV_ITEMS = [
+  { label: "Services", id: "services" },
+  { label: "Our Work", id: "work" },
+  { label: "Why Choose Us", id: "why-choose-us" },
+  { label: "Service Area", id: "service-area" },
 ];
 
 export default function Home() {
   const [navVisible, setNavVisible] = useState(true);
   const [workVisible, setWorkVisible] = useState(false);
+  const [serviceEdgeHover, setServiceEdgeHover] = useState<"left" | "right" | null>(null);
+  const [serviceButtonHover, setServiceButtonHover] = useState<"left" | "right" | null>(null);
+  const [serviceButtonOpacity, setServiceButtonOpacity] = useState({ left: 0, right: 0 });
   const workSectionRef = useRef<HTMLElement | null>(null);
+  const heroLoadRef = useRef<HTMLDivElement | null>(null);
+  const serviceGalleryRef = useRef<{ nudgeLeft: () => void; nudgeRight: () => void } | null>(null);
 
   const smoothScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
     e.preventDefault();
     const el = document.getElementById(targetId);
     el?.scrollIntoView({ behavior: "smooth" });
   };
+
+  useEffect(() => {
+    const heroNode = heroLoadRef.current;
+    if (!heroNode) return;
+    heroNode.classList.remove("hero-ready");
+    const timer = window.setTimeout(() => {
+      heroNode.classList.add("hero-ready");
+    }, 120);
+
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const hero = document.getElementById("hero-section");
@@ -150,6 +119,36 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
+  const handleServiceHoverEdge = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const revealRadius = Math.min(260, rect.width * 0.22);
+    const buttonHalfSize = 36;
+    const buttonInset = 12;
+    const buttonCenterY = rect.height * 0.56;
+    const leftCenterX = buttonInset + buttonHalfSize;
+    const rightCenterX = rect.width - buttonInset - buttonHalfSize;
+
+    const leftDist = Math.hypot(x - leftCenterX, y - buttonCenterY);
+    const rightDist = Math.hypot(x - rightCenterX, y - buttonCenterY);
+    const toOpacity = (distance: number) => {
+      const t = Math.max(0, 1 - distance / revealRadius);
+      return +(t * 0.8).toFixed(3);
+    };
+    const leftOpacity = toOpacity(leftDist);
+    const rightOpacity = toOpacity(rightDist);
+    setServiceButtonOpacity({ left: leftOpacity, right: rightOpacity });
+
+    if (leftOpacity > rightOpacity && leftOpacity > 0) {
+      setServiceEdgeHover("left");
+    } else if (rightOpacity > leftOpacity && rightOpacity > 0) {
+      setServiceEdgeHover("right");
+    } else {
+      setServiceEdgeHover(null);
+    }
+  };
+
   useEffect(() => {
     if (!workSectionRef.current) return;
 
@@ -167,6 +166,55 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const revealSelector =
+      "h1, h2, h3, p, a, li, .group, .final-cta-shell, .area-pill, video, .service-gallery-reveal";
+    const sections = Array.from(document.querySelectorAll<HTMLElement>("section"));
+    const revealElements: HTMLElement[] = [];
+
+    sections.forEach((section) => {
+      const sectionItems = Array.from(section.querySelectorAll<HTMLElement>(revealSelector)).filter((el) => {
+        if (el.classList.contains("service-edge-button")) return false;
+        if (el.closest(".service-edge-button")) return false;
+        if (el.closest("#hero-section")) return false;
+        return true;
+      });
+
+      sectionItems.forEach((el, index) => {
+        el.style.setProperty("--reveal-delay", `${Math.min(index * 45, 360)}ms`);
+        revealElements.push(el);
+      });
+    });
+
+    if (!revealElements.length) return;
+
+    revealElements.forEach((el) => el.classList.add("scroll-reveal"));
+
+    if (reduceMotion) {
+      revealElements.forEach((el) => el.classList.add("is-visible"));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      {
+        threshold: 0.06,
+        rootMargin: "0px 0px -4% 0px",
+      }
+    );
+
+    revealElements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       {/* Nav - only visible when at top section */}
@@ -175,7 +223,7 @@ export default function Home() {
           navVisible ? "nav-visible" : "nav-hidden"
         }`}
       >
-        <div className="mx-auto grid max-w-6xl grid-cols-3 items-center px-4 py-4 sm:px-6">
+        <div className="mx-auto grid max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 px-4 py-4 sm:px-6">
           {/* Logo - left */}
           <a
             href="/"
@@ -189,21 +237,33 @@ export default function Home() {
           </a>
 
           {/* Center nav */}
-          <div className="flex items-center justify-center">
-            <a
-              href="/#services"
-              onClick={(e) => smoothScrollTo(e, "services")}
-              className="nav-link text-sm font-medium text-white/90 transition-all duration-300 hover:text-[#39ff14] hover:scale-110"
-            >
-              Services
-            </a>
+          <div className="flex items-center justify-center overflow-x-auto overflow-y-visible py-1">
+            <div className="flex min-w-max items-center gap-6 lg:gap-8">
+              {NAV_ITEMS.map((item) => (
+                <a
+                  key={item.id}
+                  href={`/#${item.id}`}
+                  onClick={(e) => smoothScrollTo(e, item.id)}
+                  className="nav-link inline-block whitespace-nowrap pb-1 text-[11px] font-medium text-white/90 transition-all duration-300 hover:scale-110 hover:text-[#39ff14] sm:text-xs lg:text-sm"
+                >
+                  {item.label}
+                </a>
+              ))}
+            </div>
           </div>
 
-          {/* Call Now - right */}
-          <div className="flex justify-end">
+          {/* CTA buttons - right */}
+          <div className="flex items-center justify-end gap-2">
+            <a
+              href="/#contact"
+              onClick={(e) => smoothScrollTo(e, "contact")}
+              className="nav-cta-soft rounded-xl border border-white/20 px-4 py-2.5 text-xs font-semibold whitespace-nowrap text-white transition-all duration-300 hover:scale-105 hover:border-white/35 hover:bg-white/5 active:scale-[0.98] sm:px-5 sm:text-sm"
+            >
+              Request Quote
+            </a>
             <a
               href={PHONE}
-              className="nav-cta rounded-xl bg-[#39ff14] px-5 py-2.5 text-sm font-semibold text-black shadow-lg shadow-[#39ff14]/20 transition-all duration-300 hover:scale-105 hover:bg-[#5fff3d] hover:shadow-[#39ff14]/40 active:scale-[0.98]"
+              className="nav-cta rounded-xl bg-[#39ff14] px-4 py-2.5 text-xs font-semibold whitespace-nowrap text-black shadow-lg shadow-[#39ff14]/20 transition-all duration-300 hover:scale-105 hover:bg-[#5fff3d] hover:shadow-[#39ff14]/40 active:scale-[0.98] sm:px-5 sm:text-sm"
             >
               Call Now
             </a>
@@ -232,8 +292,28 @@ export default function Home() {
             background: "linear-gradient(180deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.88) 50%, rgba(10,10,10,0.96) 100%)",
           }}
         />
+        <div className="absolute inset-0 z-[2]">
+          <LightRays
+            raysOrigin="top-center"
+            raysColor="#ffffff"
+            raysSpeed={0.7}
+            lightSpread={0.7}
+            rayLength={1.8}
+            followMouse={true}
+            mouseInfluence={0.05}
+            noiseAmount={0}
+            distortion={0}
+            className="custom-rays"
+            pulsating={false}
+            fadeDistance={1.3}
+            saturation={1}
+          />
+        </div>
 
-        <div className="relative z-10 mx-auto flex w-full max-w-4xl -mt-16 flex-col items-center text-center">
+        <div
+          ref={heroLoadRef}
+          className="hero-load-root relative z-10 mx-auto flex w-full max-w-4xl -mt-16 flex-col items-center text-center"
+        >
           {/* Subtle green glow behind title */}
           <div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] max-w-2xl h-64 opacity-30 pointer-events-none"
@@ -243,21 +323,20 @@ export default function Home() {
           />
 
           {/* Title - dominant focal point */}
-          <h1 className="relative mb-6 animate-fade-in-up text-5xl font-extrabold leading-[1.1] tracking-tight sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl">
+          <h1 className="hero-load-item hero-load-1 relative mb-6 text-5xl font-extrabold leading-[1.1] tracking-tight sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl">
             4B<span className="text-[#39ff14]">Landscape</span>
           </h1>
 
           {/* Subtitle */}
-          <p className="relative mx-auto mb-24 max-w-xl animate-fade-in-up-delay-1 text-base text-zinc-400 sm:text-lg md:text-xl">
+          <p className="hero-load-item hero-load-2 relative mx-auto mb-24 max-w-xl text-base text-zinc-400 sm:text-lg md:text-xl">
             Keeping Columbus yards clean, healthy, and looking their best.
           </p>
 
           {/* CTA Buttons */}
-          <div className="relative mb-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <div className="hero-load-item hero-load-3 relative mb-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <a
               href={PHONE}
-              className="hero-cta-primary hero-cta-animate flex w-full max-w-xs items-center justify-center gap-2.5 rounded-xl bg-[#39ff14] px-8 py-4 text-lg font-bold text-black shadow-lg shadow-[#39ff14]/25 hover:bg-[#5fff3d] sm:w-auto sm:px-10 sm:py-4.5 sm:text-xl"
-              style={{ animationDelay: "0.25s", opacity: 0 }}
+              className="cta-main-primary inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#39ff14] px-9 py-4 text-lg font-bold text-black shadow-sm shadow-[#39ff14]/10 sm:w-auto sm:min-w-[210px]"
             >
               <PhoneIcon className="h-5 w-5 sm:h-6 sm:w-6" />
               Call Now
@@ -265,15 +344,14 @@ export default function Home() {
             <a
               href="/#contact"
               onClick={(e) => smoothScrollTo(e, "contact")}
-              className="hero-cta-secondary hero-cta-animate flex w-full max-w-xs items-center justify-center rounded-xl border-2 border-white px-8 py-4 text-lg font-semibold text-white sm:w-auto sm:px-10 sm:py-4.5 sm:text-xl"
-              style={{ animationDelay: "0.35s", opacity: 0 }}
+              className="cta-main-secondary inline-flex w-full items-center justify-center rounded-xl border-2 border-white px-9 py-4 text-lg font-semibold text-white sm:w-auto sm:min-w-[210px]"
             >
-              Get Free Quote
+              Request Free Quote
             </a>
           </div>
 
           {/* Service area - smaller, subtle */}
-          <p className="relative animate-fade-in-up-delay-3 text-xs text-zinc-600 sm:text-sm">
+          <p className="hero-load-item hero-load-4 relative text-xs text-zinc-600 sm:text-sm">
             Proudly serving Columbus and nearby communities
           </p>
         </div>
@@ -282,46 +360,104 @@ export default function Home() {
       {/* Services Section */}
       <section
         id="services"
-        className="scroll-mt-20 border-t border-white/5 bg-[#0f0f0f] px-4 py-20 sm:px-6"
+        className="scroll-mt-20 border-t border-white/5 bg-[#0f0f0f] px-4 pt-28 pb-20 sm:px-6"
       >
         <div className="mx-auto max-w-6xl">
-          <h2 className="mb-4 text-center text-4xl font-bold sm:text-5xl">
-            Our Landscaping Services
+          <h2 className="mb-8 text-center text-4xl font-bold sm:text-5xl">
+            Explore Our Landscaping Services
           </h2>
-          <p className="mx-auto mb-14 max-w-2xl text-center text-zinc-400">
-            Complete landscaping services for homes across Columbus.
+          <p className="text-center text-sm text-zinc-400 sm:text-base">
+            Swipe to explore services -&gt;
           </p>
+        </div>
 
-          <div className="space-y-14">
-            {SERVICE_CATEGORIES.map((category) => (
-              <div key={category.title}>
-                <h3 className="mb-6 text-sm font-semibold uppercase tracking-wider text-[#39ff14]">
-                  {category.title}
-                </h3>
-                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {category.services.map((service) => (
-                    <div
-                      key={service.name}
-                      className="service-card rounded-xl border border-white/5 bg-[#1a1a1a] p-6 transition-all duration-300"
-                    >
-                      <service.Icon className="mb-4 h-8 w-8 text-[#39ff14]" />
-                      <h4 className="mb-2 font-semibold text-white">{service.name}</h4>
-                      <p className="text-sm text-zinc-500">{service.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+        <div
+          className="service-gallery-reveal relative left-1/2 mt-5 h-[700px] w-screen -translate-x-1/2 overflow-visible"
+          onMouseMove={handleServiceHoverEdge}
+          onMouseLeave={() => {
+            setServiceEdgeHover(null);
+            setServiceButtonHover(null);
+            setServiceButtonOpacity({ left: 0, right: 0 });
+          }}
+        >
+          <CircularGalleryAny
+            ref={serviceGalleryRef}
+            items={SERVICE_GALLERY_ITEMS}
+            bend={1}
+            textColor="#ffffff"
+            borderRadius={0.05}
+            scrollSpeed={2}
+            scrollEase={0.05}
+          />
+          <button
+            type="button"
+            aria-label="Scroll services left"
+            onClick={() => serviceGalleryRef.current?.nudgeLeft()}
+            onMouseEnter={() => setServiceButtonHover("left")}
+            onMouseLeave={() => setServiceButtonHover(null)}
+            className={`service-edge-button left-8 ${serviceEdgeHover === "left" ? "is-active" : ""}`}
+            style={{
+              opacity: serviceButtonHover === "left" ? 1 : serviceButtonOpacity.left,
+              pointerEvents:
+                serviceButtonHover === "left" || serviceButtonOpacity.left > 0.05 ? "auto" : "none",
+            }}
+          >
+            <span className="service-edge-button-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} d="M15 5 8 12l7 7" />
+              </svg>
+            </span>
+          </button>
+          <button
+            type="button"
+            aria-label="Scroll services right"
+            onClick={() => serviceGalleryRef.current?.nudgeRight()}
+            onMouseEnter={() => setServiceButtonHover("right")}
+            onMouseLeave={() => setServiceButtonHover(null)}
+            className={`service-edge-button right-8 ${serviceEdgeHover === "right" ? "is-active" : ""}`}
+            style={{
+              opacity: serviceButtonHover === "right" ? 1 : serviceButtonOpacity.right,
+              pointerEvents:
+                serviceButtonHover === "right" || serviceButtonOpacity.right > 0.05 ? "auto" : "none",
+            }}
+          >
+            <span className="service-edge-button-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} d="m9 5 7 7-7 7" />
+              </svg>
+            </span>
+          </button>
+        </div>
+
+        <div className="mx-auto mt-14 flex max-w-6xl flex-col items-center px-4 pb-4">
+          <div className="flex w-full max-w-2xl flex-col items-center gap-4 sm:flex-row sm:justify-center">
+            <a
+              href={PHONE}
+              className="cta-main-primary inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#39ff14] px-9 py-4 text-lg font-bold text-black shadow-sm shadow-[#39ff14]/10 sm:w-auto sm:min-w-[210px]"
+            >
+              <PhoneIcon className="h-5 w-5" />
+              CALL NOW
+            </a>
+            <a
+              href="/#contact"
+              onClick={(e) => smoothScrollTo(e, "contact")}
+              className="cta-main-secondary inline-flex w-full items-center justify-center rounded-xl border-2 border-white px-9 py-4 text-lg font-semibold text-white sm:w-auto sm:min-w-[210px]"
+            >
+              REQUEST QUOTE
+            </a>
           </div>
-
+          <p className="mt-5 text-center text-sm text-zinc-400">
+            Not sure what you need? Give us a call and we’ll help.
+          </p>
         </div>
       </section>
 
 
       {/* Our Work Section */}
       <section
+        id="work"
         ref={workSectionRef}
-        className="border-t border-white/5 bg-[#0b0b0b] px-4 py-24 sm:px-6"
+        className="border-t border-white/5 bg-[#0b0b0b] px-4 pt-24 pb-10 sm:px-6"
       >
         <div className="mx-auto max-w-6xl">
           <p className="mb-3 text-center text-sm font-semibold uppercase tracking-[0.2em] text-[#39ff14]">
@@ -342,59 +478,121 @@ export default function Home() {
               See how our work can completely transform a property.
             </p>
 
-            <div className="space-y-10">
-              {beforeAfterProjects.map((project, index) => (
-                <div
-                  key={project.label}
-                  className={`work-reveal ${workVisible ? "is-visible" : ""}`}
-                  style={{ transitionDelay: `${0.08 * (index + 1)}s` }}
-                >
-                  <div className="mb-4 text-sm font-semibold uppercase tracking-wide text-[#39ff14]">
-                    {project.label}
-                  </div>
-                  <div className="grid gap-4 lg:grid-cols-2">
-                    <div className="relative">
-                      <img
-                        src={project.before}
-                        alt={`${project.label} before`}
-                        loading="lazy"
-                        className="h-64 w-full rounded-2xl object-cover sm:h-80 lg:h-[27rem]"
-                      />
-                      <span className="absolute left-3 top-3 rounded-full border border-white/20 bg-black/55 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-200">
-                        Before
-                      </span>
-                    </div>
-                    <div className="relative">
-                      <img
-                        src={project.after}
-                        alt={`${project.label} after`}
-                        loading="lazy"
-                        className="h-64 w-full rounded-2xl object-cover sm:h-80 lg:h-[27rem]"
-                      />
-                      <span className="absolute left-3 top-3 rounded-full border border-white/20 bg-black/55 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-200">
-                        After
-                      </span>
-                    </div>
-                  </div>
+            <div className="grid gap-8 md:grid-cols-3">
+              <div className="group relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out hover:scale-[1.02] hover:border-[#39ff14]/60 hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
+                <img
+                  src="/work/before-1.png"
+                  alt="Before landscaping work"
+                  className="h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-[1.01] group-hover:opacity-0 group-hover:brightness-90"
+                />
+                <img
+                  src="/work/after-1.png"
+                  alt="After landscaping work"
+                  className="absolute inset-0 z-10 h-full w-full scale-[1.01] object-cover opacity-0 transition-all duration-700 ease-out group-hover:scale-100 group-hover:opacity-100 group-hover:brightness-90"
+                />
+                <div className="pointer-events-none absolute bottom-3 left-3 rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200">
+                  Hover to reveal after
                 </div>
-              ))}
+              </div>
+              <div className="group relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out hover:scale-[1.02] hover:border-[#39ff14]/60 hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
+                <img
+                  src="/work/before-2.png"
+                  alt="Before landscaping work"
+                  className="h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-[1.01] group-hover:opacity-0 group-hover:brightness-90"
+                />
+                <img
+                  src="/work/after-2.png"
+                  alt="After landscaping work"
+                  className="absolute inset-0 z-10 h-full w-full scale-[1.01] object-cover opacity-0 transition-all duration-700 ease-out group-hover:scale-100 group-hover:opacity-100 group-hover:brightness-90"
+                />
+                <div className="pointer-events-none absolute bottom-3 left-3 rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200">
+                  Hover to reveal after
+                </div>
+              </div>
+              <div className="group relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out hover:scale-[1.02] hover:border-[#39ff14]/60 hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
+                <img
+                  src="/work/after-3.png"
+                  alt="After landscaping work"
+                  className="h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-[1.01] group-hover:opacity-0 group-hover:brightness-90"
+                />
+                <img
+                  src="/work/before-3.png"
+                  alt="Before landscaping work"
+                  className="absolute inset-0 z-10 h-full w-full scale-[1.01] object-cover opacity-0 transition-all duration-700 ease-out group-hover:scale-100 group-hover:opacity-100 group-hover:brightness-90"
+                />
+                <div className="pointer-events-none absolute bottom-3 left-3 rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200">
+                  Hover to reveal after
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div className="flex justify-center pt-2">
-            <a
-              href="/our-work"
-              className="group inline-flex items-center gap-2 rounded-xl border border-white/15 bg-[#141414] px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:border-[#39ff14]/50 hover:text-[#39ff14] hover:shadow-[0_8px_24px_rgba(57,255,20,0.16)]"
-            >
-              View More Work
-              <ArrowRightIcon className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-            </a>
+            <div className="mt-8 grid gap-8 md:grid-cols-3">
+              <div className="group relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out hover:scale-[1.02] hover:border-[#39ff14]/60 hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
+                <img
+                  src="/work/before-4.png"
+                  alt="Before landscaping work"
+                  className="h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-[1.01] group-hover:opacity-0 group-hover:brightness-90"
+                />
+                <img
+                  src="/work/after-4.png"
+                  alt="After landscaping work"
+                  className="absolute inset-0 z-10 h-full w-full object-cover opacity-0 transition-all duration-700 ease-out group-hover:opacity-100 group-hover:brightness-90"
+                />
+                <div className="pointer-events-none absolute bottom-3 left-3 rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200">
+                  Hover to reveal after
+                </div>
+              </div>
+              <div className="group relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out hover:scale-[1.02] hover:border-[#39ff14]/60 hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
+                <img
+                  src="/work/before-5.png"
+                  alt="Before landscaping work"
+                  className="h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-[1.01] group-hover:opacity-0 group-hover:brightness-90"
+                />
+                <img
+                  src="/work/after-5.png"
+                  alt="After landscaping work"
+                  className="absolute inset-0 z-10 h-full w-full object-cover opacity-0 transition-all duration-700 ease-out group-hover:opacity-100 group-hover:brightness-90"
+                />
+                <div className="pointer-events-none absolute bottom-3 left-3 rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200">
+                  Hover to reveal after
+                </div>
+              </div>
+              <div className="group relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out hover:scale-[1.02] hover:border-[#39ff14]/60 hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
+                <img
+                  src="/work/before-6.png"
+                  alt="Before landscaping work"
+                  className="h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-[1.01] group-hover:opacity-0 group-hover:brightness-90"
+                />
+                <img
+                  src="/work/after-6.png"
+                  alt="After landscaping work"
+                  className="absolute inset-0 z-10 h-full w-full object-cover opacity-0 transition-all duration-700 ease-out group-hover:opacity-100 group-hover:brightness-90"
+                />
+                <div className="pointer-events-none absolute bottom-3 left-3 rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200">
+                  Hover to reveal after
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-14 flex flex-col items-center text-center">
+              <p className="mb-4 text-sm text-zinc-400">Like what you see?</p>
+              <a
+                href="/#contact"
+                onClick={(e) => smoothScrollTo(e, "contact")}
+                className="inline-flex items-center justify-center rounded-lg border border-white/25 px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.02] hover:border-[#39ff14]/60 hover:text-[#39ff14]"
+              >
+                Get a Free Quote
+              </a>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Why Choose Us */}
-      <section className="border-t border-white/5 bg-[#0e0e0e] px-4 py-24 sm:px-6">
+      <section
+        id="why-choose-us"
+        className="border-t border-white/5 bg-[#0e0e0e] px-4 pt-24 pb-32 sm:px-6"
+      >
         <div className="mx-auto max-w-6xl">
           <p className="mb-3 text-center text-sm font-semibold uppercase tracking-[0.2em] text-[#39ff14]">
             Why Choose Us
@@ -407,52 +605,79 @@ export default function Home() {
             Why Homeowners Choose 4BLandscaping
           </h2>
           <p
-            className={`work-reveal mx-auto mb-10 max-w-2xl text-center text-zinc-400 ${
+            className={`work-reveal mx-auto mb-16 max-w-2xl text-center text-zinc-400 ${
               workVisible ? "is-visible" : ""
             }`}
             style={{ transitionDelay: "0.06s" }}
           >
-            Reliable service, quality work, and straightforward communication from a local team you
-            can trust.
+            Reliable landscaping, clean results, and a local team you can count on.
           </p>
 
-          <div
-            className={`work-reveal mb-12 flex flex-wrap items-center justify-center gap-3 ${
-              workVisible ? "is-visible" : ""
-            }`}
-            style={{ transitionDelay: "0.1s" }}
-          >
-            <span className="rounded-full border border-white/10 bg-[#151515] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-300">
-              Local Columbus Business
-            </span>
-            <span className="rounded-full border border-white/10 bg-[#151515] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-300">
-              Fast Response
-            </span>
-            <span className="rounded-full border border-white/10 bg-[#151515] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-300">
-              Free Estimates
-            </span>
-          </div>
+          <div className="grid items-stretch gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
+            <div
+              className={`work-reveal h-full rounded-2xl border border-white/10 bg-[#171717] p-6 shadow-xl shadow-black/25 sm:p-8 ${
+                workVisible ? "is-visible" : ""
+              }`}
+              style={{ transitionDelay: "0.1s" }}
+            >
+              <h3 className="mb-4 text-2xl font-bold leading-tight whitespace-nowrap text-white sm:text-3xl">
+                Homeowners trust 4BLandscape
+              </h3>
+              <p className="mb-7 max-w-xl text-base leading-7 text-zinc-400">
+                We provide reliable landscaping, clear communication, and clean professional results
+                for homeowners across Columbus.
+              </p>
+              <ul className="mt-2 flex h-[calc(100%-14rem)] flex-col justify-between">
+                {WHY_CHOOSE_BENEFITS.map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-start gap-4 rounded-xl px-2 py-1 text-lg leading-8 text-zinc-300 transition-all duration-300 hover:translate-x-2 hover:text-zinc-100"
+                  >
+                    <CheckMarkIcon className="mt-1 h-6 w-6 shrink-0 text-[#39ff14]" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
 
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {TRUST_POINTS.map((point, index) => (
-              <article
-                key={point.title}
-                className={`trust-card work-reveal rounded-2xl border border-white/10 bg-[#181818] p-6 shadow-lg shadow-black/25 ${
-                  workVisible ? "is-visible" : ""
-                }`}
-                style={{ transitionDelay: `${0.08 * (index + 1)}s` }}
-              >
-                <TrustBadgeIcon className="mb-4 h-7 w-7 text-[#39ff14]" />
-                <h3 className="mb-2 text-lg font-semibold text-white">{point.title}</h3>
-                <p className="text-sm leading-6 text-zinc-400">{point.description}</p>
-              </article>
-            ))}
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <span className="rounded-full border border-white/10 bg-[#141414] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-300">
+                  Local Columbus Business
+                </span>
+                <span className="rounded-full border border-white/10 bg-[#141414] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-300">
+                  Fast Response
+                </span>
+                <span className="rounded-full border border-white/10 bg-[#141414] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-300">
+                  Free Estimates
+                </span>
+              </div>
+
+            </div>
+
+            <div
+              className={`work-reveal mx-auto flex h-full w-full justify-center rounded-[20px] border border-white/10 bg-[#141414] p-2 shadow-2xl shadow-black/40 ${
+                workVisible ? "is-visible" : ""
+              }`}
+              style={{ transitionDelay: "0.16s" }}
+            >
+              <div className="h-full overflow-hidden rounded-2xl">
+                <video
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  poster="/work/after-2.png"
+                  className="aspect-[4/5] h-full w-auto max-w-full object-cover"
+                >
+                  <source src="/landscaping-work.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Service Area */}
-      <section className="border-t border-white/5 bg-[#0b0b0b] px-4 py-24 sm:px-6">
+      <section id="service-area" className="border-t border-white/5 bg-[#0b0b0b] px-4 py-24 sm:px-6">
         <div className="mx-auto max-w-6xl">
           <p className="mb-3 text-center text-sm font-semibold uppercase tracking-[0.2em] text-[#39ff14]">
             Service Area
@@ -480,7 +705,6 @@ export default function Home() {
                 className={`area-pill work-reveal flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-[#151515] px-4 py-3 text-sm font-medium text-zinc-200 ${
                   workVisible ? "is-visible" : ""
                 }`}
-                style={{ transitionDelay: `${0.05 * (index + 1)}s` }}
               >
                 <LocationPinIcon className="h-4 w-4 text-[#39ff14]" />
                 <span>{city}</span>
@@ -502,50 +726,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="border-t border-white/5 bg-[#0e0e0e] px-4 py-24 sm:px-6">
-        <div className="mx-auto max-w-6xl">
-          <p className="mb-3 text-center text-sm font-semibold uppercase tracking-[0.2em] text-[#39ff14]">
-            How It Works
-          </p>
-          <h2
-            className={`work-reveal mb-4 text-center text-4xl font-bold sm:text-5xl ${
-              workVisible ? "is-visible" : ""
-            }`}
-          >
-            Simple Process, Clean Results
-          </h2>
-          <p
-            className={`work-reveal mx-auto mb-12 max-w-2xl text-center text-zinc-400 ${
-              workVisible ? "is-visible" : ""
-            }`}
-            style={{ transitionDelay: "0.08s" }}
-          >
-            Getting started is easy - just reach out, get a quick estimate, and let us handle the rest.
-          </p>
-
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {HOW_IT_WORKS_STEPS.map((step, index) => (
-              <article
-                key={step.title}
-                className={`process-card work-reveal rounded-2xl border border-white/10 bg-[#181818] p-6 shadow-lg shadow-black/25 ${
-                  workVisible ? "is-visible" : ""
-                }`}
-                style={{ transitionDelay: `${0.08 * (index + 1)}s` }}
-              >
-                <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#39ff14]/40 bg-[#39ff14]/10 text-sm font-bold text-[#39ff14]">
-                  {index + 1}
-                </div>
-                <h3 className="mb-2 text-lg font-semibold text-white">{step.title}</h3>
-                <p className="text-sm leading-6 text-zinc-400">{step.description}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Final CTA */}
-      <section className="border-t border-white/5 bg-[#0b0b0b] px-4 py-24 sm:px-6">
+      <section id="get-started" className="border-t border-white/5 bg-[#0b0b0b] px-4 py-24 sm:px-6">
         <div className="mx-auto max-w-5xl">
           <div className="final-cta-shell rounded-3xl border border-white/10 px-6 py-14 text-center sm:px-10">
             <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-[#39ff14]">
@@ -559,7 +741,7 @@ export default function Home() {
               Ready to Transform Your Yard?
             </h2>
             <p
-              className={`work-reveal mx-auto mb-10 max-w-2xl text-zinc-300 ${
+              className={`work-reveal mx-auto mb-14 max-w-none whitespace-nowrap text-sm text-zinc-300 sm:text-base ${
                 workVisible ? "is-visible" : ""
               }`}
               style={{ transitionDelay: "0.08s" }}
@@ -575,7 +757,7 @@ export default function Home() {
             >
               <a
                 href={PHONE}
-                className="final-cta-primary inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#39ff14] px-8 py-4 text-base font-bold text-black sm:w-auto sm:min-w-[190px]"
+                className="cta-main-primary inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#39ff14] px-8 py-4 text-base font-bold text-black shadow-sm shadow-[#39ff14]/10 sm:w-auto sm:min-w-[190px]"
               >
                 <PhoneIcon className="h-5 w-5" />
                 Call Now
@@ -583,9 +765,9 @@ export default function Home() {
               <a
                 href="/#contact"
                 onClick={(e) => smoothScrollTo(e, "contact")}
-                className="final-cta-secondary inline-flex w-full items-center justify-center rounded-xl border border-white/25 bg-transparent px-8 py-4 text-base font-semibold text-white sm:w-auto sm:min-w-[190px]"
+                className="cta-main-secondary inline-flex w-full items-center justify-center rounded-xl border-2 border-white px-8 py-4 text-base font-semibold text-white sm:w-auto sm:min-w-[190px]"
               >
-                Get Free Quote
+                Request Free Quote
               </a>
             </div>
 
@@ -604,62 +786,32 @@ export default function Home() {
               className={`work-reveal mt-3 text-xs text-zinc-500 ${workVisible ? "is-visible" : ""}`}
               style={{ transitionDelay: "0.2s" }}
             >
-              Proudly serving Columbus, Hilliard, Dublin, Grove City and surrounding areas.
+              Proudly serving Columbus, Ohio and surrounding areas.
             </p>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer id="contact" className="border-t border-white/10 bg-[#0b0b0b] px-4 pt-16 pb-8 sm:px-6">
-        <div className="mx-auto max-w-6xl">
-          <div className="grid gap-10 pb-10 sm:grid-cols-2 lg:grid-cols-3">
-            <div>
-              <h3 className="text-2xl font-bold tracking-tight text-white">
-                4B<span className="text-[#39ff14]">Landscape</span>
-              </h3>
-              <p className="mt-3 max-w-sm text-sm leading-6 text-zinc-400">
-                Reliable lawn care and landscaping services for homes across Columbus.
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-wider text-zinc-300">
-                Service Area
-              </p>
-              <p className="mt-3 text-sm text-zinc-400">
-                Proudly serving Columbus and surrounding areas.
-              </p>
-              <p className="mt-1 text-sm text-zinc-500">
-                Columbus • Hilliard • Dublin • Grove City
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-wider text-zinc-300">
-                Contact
-              </p>
-              <a
-                href={PHONE}
-                className="mt-3 inline-flex items-center gap-2 text-xl font-semibold text-[#39ff14] transition-colors hover:text-[#5fff3d]"
-              >
-                <PhoneIcon className="h-5 w-5" />
-                {PHONE_DISPLAY}
-              </a>
-              <p className="mt-2 text-sm text-zinc-500">
-                Call for fast quotes and availability.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-2 flex flex-col items-center justify-between gap-3 border-t border-white/5 pt-6 text-center sm:flex-row">
-            <p className="text-xs text-zinc-500">
-              © 2026 4BLandscaping. All rights reserved.
-            </p>
-            <p className="text-xs text-zinc-500">
-              Website by <span className="text-zinc-300">Stratova</span>
-            </p>
-          </div>
+      <footer id="contact" className="border-t border-white/5 bg-[#0b0b0b] px-4 py-8 sm:px-6">
+        <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-white">
+            4B<span className="text-[#39ff14]">Landscape</span>
+          </p>
+          <p className="mt-3 text-xs text-zinc-500">
+            Serving Columbus, Ohio & surrounding areas
+          </p>
+          <p className="mt-3 text-[11px] text-zinc-600">
+            © 2026 4BLandscape
+          </p>
+          <a
+            href="https://stratovabuilds.com/"
+            target="_blank"
+            rel="noreferrer"
+            className="mt-2 text-[11px] text-zinc-600 transition-all duration-300 hover:text-zinc-400"
+          >
+            Website designed by <span className="text-zinc-400 hover:text-[#39ff14]">Stratova</span>
+          </a>
         </div>
       </footer>
 
@@ -791,22 +943,14 @@ function SoilIcon({ className }: { className?: string }) {
   );
 }
 
-function ArrowRightIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M5 12h14m0 0-5-5m5 5-5 5" />
-    </svg>
-  );
-}
-
-function TrustBadgeIcon({ className }: { className?: string }) {
+function CheckMarkIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeWidth={1.6}
-        d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3zm-3.2 9.2L11 14.4l4.2-4.2"
+        strokeWidth={2.2}
+        d="m5 13 4 4L19 7"
       />
     </svg>
   );
