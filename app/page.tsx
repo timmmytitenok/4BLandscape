@@ -33,6 +33,16 @@ const SERVICE_GALLERY_ITEMS = SERVICE_CATEGORIES.flatMap((category) =>
             ? "/gallery/brick-edging.png"
             : service.name.trim() === "Sod Installation"
               ? "/gallery/sod-installation.png"
+              : service.name.trim() === "Grass Seeding"
+                ? "/gallery/grass-seeding.png"
+              : service.name.trim() === "Tree Services"
+                ? "/gallery/tree-services.png"
+              : service.name.trim() === "Fence Installation"
+                ? "/gallery/fence-installation.png"
+              : service.name.trim() === "Land Clearing"
+                ? "/gallery/land-clearing.png"
+              : service.name.trim() === "Patio Builds"
+                ? "/gallery/patio-builds.png"
               : service.name.trim() === "Lawn Mowing"
                 ? "/gallery/lawn-mowing.png"
                 : service.name.trim() === "Gravel/Mulch Deliveries"
@@ -74,8 +84,9 @@ const NAV_ITEMS = [
 ];
 
 export default function Home() {
-  const [navVisible, setNavVisible] = useState(true);
   const [workVisible, setWorkVisible] = useState(false);
+  const [activeWorkHoldId, setActiveWorkHoldId] = useState<string | null>(null);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const [serviceEdgeHover, setServiceEdgeHover] = useState<"left" | "right" | null>(null);
   const [serviceButtonHover, setServiceButtonHover] = useState<"left" | "right" | null>(null);
   const [serviceButtonOpacity, setServiceButtonOpacity] = useState({ left: 0, right: 0 });
@@ -89,6 +100,17 @@ export default function Home() {
     el?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const handleWorkHoldStart = (id: string) => setActiveWorkHoldId(id);
+  const handleWorkHoldEnd = () => setActiveWorkHoldId(null);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 639px)");
+    const applyViewportMode = () => setIsMobileViewport(media.matches);
+    applyViewportMode();
+    media.addEventListener("change", applyViewportMode);
+    return () => media.removeEventListener("change", applyViewportMode);
+  }, []);
+
   useEffect(() => {
     const heroNode = heroLoadRef.current;
     if (!heroNode) return;
@@ -98,25 +120,6 @@ export default function Home() {
     }, 120);
 
     return () => window.clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    const hero = document.getElementById("hero-section");
-    if (!hero) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        // Only show nav when hero section is visible in viewport
-        setNavVisible(entry.isIntersecting);
-      },
-      {
-        threshold: 0,
-        rootMargin: "0px 0px -400px 0px",
-      }
-    );
-
-    observer.observe(hero);
-    return () => observer.disconnect();
   }, []);
 
   const handleServiceHoverEdge = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -216,14 +219,12 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
-      {/* Nav - only visible when at top section */}
+    <div className="min-h-screen overflow-x-hidden bg-[#0a0a0a] text-white">
+      {/* Fixed Nav */}
       <nav
-        className={`nav-slide fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/10 backdrop-blur-xl hover:border-white/20 ${
-          navVisible ? "nav-visible" : "nav-hidden"
-        }`}
+        className="nav-slide nav-visible fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/30 backdrop-blur-xl hover:border-white/20"
       >
-        <div className="mx-auto grid max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 px-4 py-4 sm:px-6">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
           {/* Logo - left */}
           <a
             href="/"
@@ -231,13 +232,13 @@ export default function Home() {
               e.preventDefault();
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
-            className="w-fit text-lg font-bold tracking-tight text-white transition-transform duration-300 hover:scale-105"
+            className="w-fit shrink-0 text-base font-bold tracking-tight text-white transition-transform duration-300 hover:scale-105 sm:text-lg"
           >
             4B<span className="text-[#39ff14]">Landscape</span>
           </a>
 
-          {/* Center nav */}
-          <div className="flex items-center justify-center overflow-x-auto overflow-y-visible py-1">
+          {/* Desktop center nav */}
+          <div className="hidden flex-1 items-center justify-center overflow-x-auto overflow-y-visible py-1 md:flex">
             <div className="flex min-w-max items-center gap-6 lg:gap-8">
               {NAV_ITEMS.map((item) => (
                 <a
@@ -252,8 +253,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* CTA buttons - right */}
-          <div className="flex items-center justify-end gap-2">
+          {/* Desktop CTA buttons - right */}
+          <div className="hidden items-center justify-end gap-2 md:flex">
             <a
               href="/#contact"
               onClick={(e) => smoothScrollTo(e, "contact")}
@@ -268,13 +269,30 @@ export default function Home() {
               Call Now
             </a>
           </div>
+
+          {/* Mobile actions */}
+          <div className="flex items-center gap-2 md:hidden">
+            <a
+              href={PHONE}
+              className="inline-flex items-center justify-center rounded-lg bg-[#39ff14] px-3 py-2 text-xs font-semibold text-black shadow-lg shadow-[#39ff14]/20 transition-all duration-300 active:scale-[0.98]"
+            >
+              Call
+            </a>
+            <button
+              type="button"
+              aria-label="Open navigation menu"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/20 bg-white/5 text-white transition-colors duration-300 hover:border-white/35 hover:bg-white/10"
+            >
+              <HamburgerIcon className="h-5 w-5" />
+            </button>
+          </div>
         </div>
       </nav>
 
       {/* Hero Section - Full Screen */}
       <section
         id="hero-section"
-        className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 pt-20 sm:px-6"
+        className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 pt-24 sm:px-6"
       >
         {/* Background image - slightly blurred */}
         <div
@@ -312,7 +330,7 @@ export default function Home() {
 
         <div
           ref={heroLoadRef}
-          className="hero-load-root relative z-10 mx-auto flex w-full max-w-4xl -mt-16 flex-col items-center text-center"
+          className="hero-load-root relative z-10 mx-auto mt-0 flex w-full max-w-4xl flex-col items-center text-center sm:-mt-10"
         >
           {/* Subtle green glow behind title */}
           <div
@@ -323,20 +341,20 @@ export default function Home() {
           />
 
           {/* Title - dominant focal point */}
-          <h1 className="hero-load-item hero-load-1 relative mb-6 text-5xl font-extrabold leading-[1.1] tracking-tight sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl">
+          <h1 className="hero-load-item hero-load-1 relative mb-5 text-4xl font-extrabold leading-[1.1] tracking-tight sm:mb-6 sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl">
             4B<span className="text-[#39ff14]">Landscape</span>
           </h1>
 
           {/* Subtitle */}
-          <p className="hero-load-item hero-load-2 relative mx-auto mb-24 max-w-xl text-base text-zinc-400 sm:text-lg md:text-xl">
+          <p className="hero-load-item hero-load-2 relative mx-auto mb-16 max-w-xl text-base text-zinc-400 sm:mb-24 sm:text-lg md:text-xl">
             Keeping Columbus yards clean, healthy, and looking their best.
           </p>
 
           {/* CTA Buttons */}
-          <div className="hero-load-item hero-load-3 relative mb-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <div className="hero-load-item hero-load-3 relative mb-8 flex w-full max-w-md flex-col items-center justify-center gap-3 sm:max-w-none sm:flex-row sm:gap-4">
             <a
               href={PHONE}
-              className="cta-main-primary inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#39ff14] px-9 py-4 text-lg font-bold text-black shadow-sm shadow-[#39ff14]/10 sm:w-auto sm:min-w-[210px]"
+              className="cta-main-primary inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#39ff14] px-7 py-3.5 text-base font-bold text-black shadow-sm shadow-[#39ff14]/10 sm:w-auto sm:min-w-[210px] sm:px-9 sm:py-4 sm:text-lg"
             >
               <PhoneIcon className="h-5 w-5 sm:h-6 sm:w-6" />
               Call Now
@@ -344,7 +362,7 @@ export default function Home() {
             <a
               href="/#contact"
               onClick={(e) => smoothScrollTo(e, "contact")}
-              className="cta-main-secondary inline-flex w-full items-center justify-center rounded-xl border-2 border-white px-9 py-4 text-lg font-semibold text-white sm:w-auto sm:min-w-[210px]"
+              className="cta-main-secondary inline-flex w-full items-center justify-center rounded-xl border-2 border-white px-7 py-3.5 text-base font-semibold text-white sm:w-auto sm:min-w-[210px] sm:px-9 sm:py-4 sm:text-lg"
             >
               Request Free Quote
             </a>
@@ -363,17 +381,21 @@ export default function Home() {
         className="scroll-mt-20 border-t border-white/5 bg-[#0f0f0f] px-4 pt-28 pb-20 sm:px-6"
       >
         <div className="mx-auto max-w-6xl">
-          <h2 className="mb-8 text-center text-4xl font-bold sm:text-5xl">
-            Explore Our Landscaping Services
+          <h2 className="mb-8 text-center text-3xl font-bold sm:text-5xl">
+            <span className="block whitespace-nowrap sm:hidden">Explore Our Services</span>
+            <span className="hidden sm:inline">Explore Our Landscaping Services</span>
           </h2>
           <p className="text-center text-sm text-zinc-400 sm:text-base">
             Swipe to explore services -&gt;
           </p>
+          <p className="mt-2 text-center text-xs text-zinc-500 sm:hidden">
+            Drag left or right to browse services
+          </p>
         </div>
 
         <div
-          className="service-gallery-reveal relative left-1/2 mt-5 h-[700px] w-screen -translate-x-1/2 overflow-visible"
-          onMouseMove={handleServiceHoverEdge}
+          className="service-gallery-reveal relative left-1/2 mt-4 h-[430px] w-screen -translate-x-1/2 overflow-visible sm:mt-5 sm:h-[620px] lg:h-[700px]"
+          onMouseMove={isMobileViewport ? undefined : handleServiceHoverEdge}
           onMouseLeave={() => {
             setServiceEdgeHover(null);
             setServiceButtonHover(null);
@@ -383,11 +405,11 @@ export default function Home() {
           <CircularGalleryAny
             ref={serviceGalleryRef}
             items={SERVICE_GALLERY_ITEMS}
-            bend={1}
+            bend={isMobileViewport ? 0.72 : 1}
             textColor="#ffffff"
             borderRadius={0.05}
-            scrollSpeed={2}
-            scrollEase={0.05}
+            scrollSpeed={isMobileViewport ? 1.2 : 2}
+            scrollEase={isMobileViewport ? 0.08 : 0.05}
           />
           <button
             type="button"
@@ -395,7 +417,7 @@ export default function Home() {
             onClick={() => serviceGalleryRef.current?.nudgeLeft()}
             onMouseEnter={() => setServiceButtonHover("left")}
             onMouseLeave={() => setServiceButtonHover(null)}
-            className={`service-edge-button left-8 ${serviceEdgeHover === "left" ? "is-active" : ""}`}
+            className={`service-edge-button left-8 hidden sm:inline-flex ${serviceEdgeHover === "left" ? "is-active" : ""}`}
             style={{
               opacity: serviceButtonHover === "left" ? 1 : serviceButtonOpacity.left,
               pointerEvents:
@@ -414,7 +436,7 @@ export default function Home() {
             onClick={() => serviceGalleryRef.current?.nudgeRight()}
             onMouseEnter={() => setServiceButtonHover("right")}
             onMouseLeave={() => setServiceButtonHover(null)}
-            className={`service-edge-button right-8 ${serviceEdgeHover === "right" ? "is-active" : ""}`}
+            className={`service-edge-button right-8 hidden sm:inline-flex ${serviceEdgeHover === "right" ? "is-active" : ""}`}
             style={{
               opacity: serviceButtonHover === "right" ? 1 : serviceButtonOpacity.right,
               pointerEvents:
@@ -429,11 +451,30 @@ export default function Home() {
           </button>
         </div>
 
+        <div className="mt-4 flex items-center justify-center gap-3 sm:hidden">
+          <button
+            type="button"
+            aria-label="Scroll services left"
+            onClick={() => serviceGalleryRef.current?.nudgeLeft()}
+            className="inline-flex items-center justify-center rounded-lg border border-white/20 bg-[#111111] px-4 py-2 text-xs font-semibold text-zinc-200"
+          >
+            Prev
+          </button>
+          <button
+            type="button"
+            aria-label="Scroll services right"
+            onClick={() => serviceGalleryRef.current?.nudgeRight()}
+            className="inline-flex items-center justify-center rounded-lg border border-white/20 bg-[#111111] px-4 py-2 text-xs font-semibold text-zinc-200"
+          >
+            Next
+          </button>
+        </div>
+
         <div className="mx-auto mt-14 flex max-w-6xl flex-col items-center px-4 pb-4">
           <div className="flex w-full max-w-2xl flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <a
               href={PHONE}
-              className="cta-main-primary inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#39ff14] px-9 py-4 text-lg font-bold text-black shadow-sm shadow-[#39ff14]/10 sm:w-auto sm:min-w-[210px]"
+              className="cta-main-primary inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#39ff14] px-6 py-3 text-base font-bold text-black shadow-sm shadow-[#39ff14]/10 sm:w-auto sm:min-w-[210px] sm:px-9 sm:py-4 sm:text-lg"
             >
               <PhoneIcon className="h-5 w-5" />
               CALL NOW
@@ -441,12 +482,12 @@ export default function Home() {
             <a
               href="/#contact"
               onClick={(e) => smoothScrollTo(e, "contact")}
-              className="cta-main-secondary inline-flex w-full items-center justify-center rounded-xl border-2 border-white px-9 py-4 text-lg font-semibold text-white sm:w-auto sm:min-w-[210px]"
+              className="cta-main-secondary inline-flex w-full items-center justify-center rounded-xl border-2 border-white px-6 py-3 text-base font-semibold text-white sm:w-auto sm:min-w-[210px] sm:px-9 sm:py-4 sm:text-lg"
             >
               REQUEST QUOTE
             </a>
           </div>
-          <p className="mt-5 text-center text-sm text-zinc-400">
+          <p className="mt-5 text-center text-xs whitespace-nowrap text-zinc-400 sm:text-sm">
             Not sure what you need? Give us a call and we’ll help.
           </p>
         </div>
@@ -463,7 +504,7 @@ export default function Home() {
           <p className="mb-3 text-center text-sm font-semibold uppercase tracking-[0.2em] text-[#39ff14]">
             Our Work
           </p>
-          <h2 className="mb-4 text-center text-4xl font-bold sm:text-5xl">
+          <h2 className="mb-4 text-center text-3xl font-bold sm:text-5xl">
             See the Difference
           </h2>
           <p className="mx-auto mb-14 max-w-2xl text-center text-zinc-400">
@@ -471,105 +512,159 @@ export default function Home() {
           </p>
 
           <div className="mb-14">
-            <h3 className="mb-2 text-2xl font-semibold text-white">
+            <h3 className="mb-2 text-center text-xl font-semibold whitespace-nowrap text-white sm:text-left sm:text-2xl">
               Before & After Transformations
             </h3>
-            <p className="mb-8 text-zinc-400">
+            <p className="mb-8 text-center text-xs whitespace-nowrap text-zinc-400 sm:text-left sm:text-base">
               See how our work can completely transform a property.
             </p>
+            <p className="mb-4 text-center text-xs font-medium text-[#39ff14] sm:hidden">
+              Press and hold any image to reveal the after result.
+            </p>
 
-            <div className="grid gap-8 md:grid-cols-3">
-              <div className="group relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out hover:scale-[1.02] hover:border-[#39ff14]/60 hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-4 sm:gap-x-6 sm:gap-y-8 md:grid-cols-3 md:gap-x-8 md:gap-y-8">
+              <div
+                className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out sm:aspect-square sm:rounded-2xl sm:hover:scale-[1.02] sm:hover:border-[#39ff14]/60 sm:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]"
+                onTouchStart={() => handleWorkHoldStart("work-1")}
+                onTouchEnd={handleWorkHoldEnd}
+                onTouchCancel={handleWorkHoldEnd}
+              >
                 <img
                   src="/work/before-1.png"
                   alt="Before landscaping work"
-                  className="h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-[1.01] group-hover:opacity-0 group-hover:brightness-90"
+                  className={`h-full w-full object-cover transition-all duration-700 ease-out ${
+                    activeWorkHoldId === "work-1" ? "opacity-0" : "opacity-100"
+                  } sm:group-hover:scale-[1.01] sm:group-hover:opacity-0 sm:group-hover:brightness-90`}
                 />
                 <img
                   src="/work/after-1.png"
                   alt="After landscaping work"
-                  className="absolute inset-0 z-10 h-full w-full scale-[1.01] object-cover opacity-0 transition-all duration-700 ease-out group-hover:scale-100 group-hover:opacity-100 group-hover:brightness-90"
+                  className={`absolute inset-0 z-10 h-full w-full scale-[1.01] object-cover transition-all duration-700 ease-out ${
+                    activeWorkHoldId === "work-1" ? "opacity-100" : "opacity-0"
+                  } sm:group-hover:scale-100 sm:group-hover:opacity-100 sm:group-hover:brightness-90`}
                 />
-                <div className="pointer-events-none absolute bottom-3 left-3 rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200">
-                  Hover to reveal after
+                <div className="pointer-events-none absolute bottom-3 left-3 hidden rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200 sm:block">
+                  Press or hover to reveal after
                 </div>
               </div>
-              <div className="group relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out hover:scale-[1.02] hover:border-[#39ff14]/60 hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
+              <div
+                className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out sm:aspect-square sm:rounded-2xl sm:hover:scale-[1.02] sm:hover:border-[#39ff14]/60 sm:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]"
+                onTouchStart={() => handleWorkHoldStart("work-2")}
+                onTouchEnd={handleWorkHoldEnd}
+                onTouchCancel={handleWorkHoldEnd}
+              >
                 <img
                   src="/work/before-2.png"
                   alt="Before landscaping work"
-                  className="h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-[1.01] group-hover:opacity-0 group-hover:brightness-90"
+                  className={`h-full w-full object-cover transition-all duration-700 ease-out ${
+                    activeWorkHoldId === "work-2" ? "opacity-0" : "opacity-100"
+                  } sm:group-hover:scale-[1.01] sm:group-hover:opacity-0 sm:group-hover:brightness-90`}
                 />
                 <img
                   src="/work/after-2.png"
                   alt="After landscaping work"
-                  className="absolute inset-0 z-10 h-full w-full scale-[1.01] object-cover opacity-0 transition-all duration-700 ease-out group-hover:scale-100 group-hover:opacity-100 group-hover:brightness-90"
+                  className={`absolute inset-0 z-10 h-full w-full scale-[1.01] object-cover transition-all duration-700 ease-out ${
+                    activeWorkHoldId === "work-2" ? "opacity-100" : "opacity-0"
+                  } sm:group-hover:scale-100 sm:group-hover:opacity-100 sm:group-hover:brightness-90`}
                 />
-                <div className="pointer-events-none absolute bottom-3 left-3 rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200">
-                  Hover to reveal after
+                <div className="pointer-events-none absolute bottom-3 left-3 hidden rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200 sm:block">
+                  Press or hover to reveal after
                 </div>
               </div>
-              <div className="group relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out hover:scale-[1.02] hover:border-[#39ff14]/60 hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
-                <img
-                  src="/work/after-3.png"
-                  alt="After landscaping work"
-                  className="h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-[1.01] group-hover:opacity-0 group-hover:brightness-90"
-                />
+              <div
+                className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out sm:aspect-square sm:rounded-2xl sm:hover:scale-[1.02] sm:hover:border-[#39ff14]/60 sm:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]"
+                onTouchStart={() => handleWorkHoldStart("work-3")}
+                onTouchEnd={handleWorkHoldEnd}
+                onTouchCancel={handleWorkHoldEnd}
+              >
                 <img
                   src="/work/before-3.png"
                   alt="Before landscaping work"
-                  className="absolute inset-0 z-10 h-full w-full scale-[1.01] object-cover opacity-0 transition-all duration-700 ease-out group-hover:scale-100 group-hover:opacity-100 group-hover:brightness-90"
+                  className={`h-full w-full object-cover transition-all duration-700 ease-out ${
+                    activeWorkHoldId === "work-3" ? "opacity-0" : "opacity-100"
+                  } sm:group-hover:scale-[1.01] sm:group-hover:opacity-0 sm:group-hover:brightness-90`}
                 />
-                <div className="pointer-events-none absolute bottom-3 left-3 rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200">
-                  Hover to reveal after
+                <img
+                  src="/work/after-3.png"
+                  alt="After landscaping work"
+                  className={`absolute inset-0 z-10 h-full w-full scale-[1.01] object-cover transition-all duration-700 ease-out ${
+                    activeWorkHoldId === "work-3" ? "opacity-100" : "opacity-0"
+                  } sm:group-hover:scale-100 sm:group-hover:opacity-100 sm:group-hover:brightness-90`}
+                />
+                <div className="pointer-events-none absolute bottom-3 left-3 hidden rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200 sm:block">
+                  Press or hover to reveal after
                 </div>
               </div>
-            </div>
-
-            <div className="mt-8 grid gap-8 md:grid-cols-3">
-              <div className="group relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out hover:scale-[1.02] hover:border-[#39ff14]/60 hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
+              <div
+                className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out sm:aspect-square sm:rounded-2xl sm:hover:scale-[1.02] sm:hover:border-[#39ff14]/60 sm:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]"
+                onTouchStart={() => handleWorkHoldStart("work-4")}
+                onTouchEnd={handleWorkHoldEnd}
+                onTouchCancel={handleWorkHoldEnd}
+              >
                 <img
                   src="/work/before-4.png"
                   alt="Before landscaping work"
-                  className="h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-[1.01] group-hover:opacity-0 group-hover:brightness-90"
+                  className={`h-full w-full object-cover transition-all duration-700 ease-out ${
+                    activeWorkHoldId === "work-4" ? "opacity-0" : "opacity-100"
+                  } sm:group-hover:scale-[1.01] sm:group-hover:opacity-0 sm:group-hover:brightness-90`}
                 />
                 <img
                   src="/work/after-4.png"
                   alt="After landscaping work"
-                  className="absolute inset-0 z-10 h-full w-full object-cover opacity-0 transition-all duration-700 ease-out group-hover:opacity-100 group-hover:brightness-90"
+                  className={`absolute inset-0 z-10 h-full w-full object-cover transition-all duration-700 ease-out ${
+                    activeWorkHoldId === "work-4" ? "opacity-100" : "opacity-0"
+                  } sm:group-hover:opacity-100 sm:group-hover:brightness-90`}
                 />
-                <div className="pointer-events-none absolute bottom-3 left-3 rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200">
-                  Hover to reveal after
+                <div className="pointer-events-none absolute bottom-3 left-3 hidden rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200 sm:block">
+                  Press or hover to reveal after
                 </div>
               </div>
-              <div className="group relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out hover:scale-[1.02] hover:border-[#39ff14]/60 hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
+              <div
+                className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out sm:aspect-square sm:rounded-2xl sm:hover:scale-[1.02] sm:hover:border-[#39ff14]/60 sm:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]"
+                onTouchStart={() => handleWorkHoldStart("work-5")}
+                onTouchEnd={handleWorkHoldEnd}
+                onTouchCancel={handleWorkHoldEnd}
+              >
                 <img
                   src="/work/before-5.png"
                   alt="Before landscaping work"
-                  className="h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-[1.01] group-hover:opacity-0 group-hover:brightness-90"
+                  className={`h-full w-full object-cover transition-all duration-700 ease-out ${
+                    activeWorkHoldId === "work-5" ? "opacity-0" : "opacity-100"
+                  } sm:group-hover:scale-[1.01] sm:group-hover:opacity-0 sm:group-hover:brightness-90`}
                 />
                 <img
                   src="/work/after-5.png"
                   alt="After landscaping work"
-                  className="absolute inset-0 z-10 h-full w-full object-cover opacity-0 transition-all duration-700 ease-out group-hover:opacity-100 group-hover:brightness-90"
+                  className={`absolute inset-0 z-10 h-full w-full object-cover transition-all duration-700 ease-out ${
+                    activeWorkHoldId === "work-5" ? "opacity-100" : "opacity-0"
+                  } sm:group-hover:opacity-100 sm:group-hover:brightness-90`}
                 />
-                <div className="pointer-events-none absolute bottom-3 left-3 rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200">
-                  Hover to reveal after
+                <div className="pointer-events-none absolute bottom-3 left-3 hidden rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200 sm:block">
+                  Press or hover to reveal after
                 </div>
               </div>
-              <div className="group relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out hover:scale-[1.02] hover:border-[#39ff14]/60 hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
+              <div
+                className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out sm:aspect-square sm:rounded-2xl sm:hover:scale-[1.02] sm:hover:border-[#39ff14]/60 sm:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]"
+                onTouchStart={() => handleWorkHoldStart("work-6")}
+                onTouchEnd={handleWorkHoldEnd}
+                onTouchCancel={handleWorkHoldEnd}
+              >
                 <img
                   src="/work/before-6.png"
                   alt="Before landscaping work"
-                  className="h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-[1.01] group-hover:opacity-0 group-hover:brightness-90"
+                  className={`h-full w-full object-cover transition-all duration-700 ease-out ${
+                    activeWorkHoldId === "work-6" ? "opacity-0" : "opacity-100"
+                  } sm:group-hover:scale-[1.01] sm:group-hover:opacity-0 sm:group-hover:brightness-90`}
                 />
                 <img
                   src="/work/after-6.png"
                   alt="After landscaping work"
-                  className="absolute inset-0 z-10 h-full w-full object-cover opacity-0 transition-all duration-700 ease-out group-hover:opacity-100 group-hover:brightness-90"
+                  className={`absolute inset-0 z-10 h-full w-full object-cover transition-all duration-700 ease-out ${
+                    activeWorkHoldId === "work-6" ? "opacity-100" : "opacity-0"
+                  } sm:group-hover:opacity-100 sm:group-hover:brightness-90`}
                 />
-                <div className="pointer-events-none absolute bottom-3 left-3 rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200">
-                  Hover to reveal after
+                <div className="pointer-events-none absolute bottom-3 left-3 hidden rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200 sm:block">
+                  Press or hover to reveal after
                 </div>
               </div>
             </div>
@@ -598,14 +693,14 @@ export default function Home() {
             Why Choose Us
           </p>
           <h2
-            className={`work-reveal mb-4 text-center text-4xl font-bold sm:text-5xl ${
+            className={`work-reveal mb-12 text-center text-3xl font-bold sm:mb-4 sm:text-5xl ${
               workVisible ? "is-visible" : ""
             }`}
           >
-            Why Homeowners Choose 4BLandscaping
+            Why Homeowners Choose 4BLandscape
           </h2>
           <p
-            className={`work-reveal mx-auto mb-16 max-w-2xl text-center text-zinc-400 ${
+            className={`work-reveal mx-auto mb-16 hidden max-w-2xl text-center text-zinc-400 sm:block ${
               workVisible ? "is-visible" : ""
             }`}
             style={{ transitionDelay: "0.06s" }}
@@ -615,38 +710,38 @@ export default function Home() {
 
           <div className="grid items-stretch gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
             <div
-              className={`work-reveal h-full rounded-2xl border border-white/10 bg-[#171717] p-6 shadow-xl shadow-black/25 sm:p-8 ${
+              className={`work-reveal h-full rounded-2xl border border-white/10 bg-[#171717] p-5 shadow-xl shadow-black/25 sm:p-8 ${
                 workVisible ? "is-visible" : ""
               }`}
               style={{ transitionDelay: "0.1s" }}
             >
-              <h3 className="mb-4 text-2xl font-bold leading-tight whitespace-nowrap text-white sm:text-3xl">
+              <h3 className="mb-3 text-xl font-bold leading-tight text-white sm:mb-4 sm:text-3xl">
                 Homeowners trust 4BLandscape
               </h3>
-              <p className="mb-7 max-w-xl text-base leading-7 text-zinc-400">
+              <p className="mb-5 max-w-xl text-sm leading-6 text-zinc-400 sm:mb-7 sm:text-base sm:leading-7">
                 We provide reliable landscaping, clear communication, and clean professional results
                 for homeowners across Columbus.
               </p>
-              <ul className="mt-2 flex h-[calc(100%-14rem)] flex-col justify-between">
+              <ul className="mt-1 flex h-auto flex-col gap-2 sm:mt-2 sm:h-[calc(100%-14rem)] sm:justify-between sm:gap-0">
                 {WHY_CHOOSE_BENEFITS.map((item) => (
                   <li
                     key={item}
-                    className="flex items-start gap-4 rounded-xl px-2 py-1 text-lg leading-8 text-zinc-300 transition-all duration-300 hover:translate-x-2 hover:text-zinc-100"
+                    className="flex items-start gap-3 rounded-xl px-1.5 py-1.5 text-base leading-6 text-zinc-300 transition-all duration-300 sm:gap-4 sm:px-2 sm:py-1 sm:text-lg sm:leading-8 sm:hover:translate-x-2 sm:hover:text-zinc-100"
                   >
-                    <CheckMarkIcon className="mt-1 h-6 w-6 shrink-0 text-[#39ff14]" />
+                    <CheckMarkIcon className="mt-1 h-5 w-5 shrink-0 text-[#39ff14] sm:h-6 sm:w-6" />
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
 
-              <div className="mt-8 flex flex-wrap items-center gap-3">
-                <span className="rounded-full border border-white/10 bg-[#141414] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-300">
+              <div className="mt-6 hidden flex-wrap items-center gap-2 sm:mt-8 sm:flex sm:gap-3">
+                <span className="rounded-full border border-white/10 bg-[#141414] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-300 sm:px-4 sm:py-2 sm:text-xs">
                   Local Columbus Business
                 </span>
-                <span className="rounded-full border border-white/10 bg-[#141414] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-300">
+                <span className="rounded-full border border-white/10 bg-[#141414] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-300 sm:px-4 sm:py-2 sm:text-xs">
                   Fast Response
                 </span>
-                <span className="rounded-full border border-white/10 bg-[#141414] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-300">
+                <span className="rounded-full border border-white/10 bg-[#141414] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-300 sm:px-4 sm:py-2 sm:text-xs">
                   Free Estimates
                 </span>
               </div>
@@ -683,14 +778,14 @@ export default function Home() {
             Service Area
           </p>
           <h2
-            className={`work-reveal mb-4 text-center text-4xl font-bold sm:text-5xl ${
+            className={`work-reveal mb-10 text-center text-3xl font-bold sm:mb-4 sm:text-5xl ${
               workVisible ? "is-visible" : ""
             }`}
           >
             Serving Columbus & Surrounding Areas
           </h2>
           <p
-            className={`work-reveal mx-auto mb-10 max-w-2xl text-center text-zinc-400 ${
+            className={`work-reveal mx-auto mb-10 hidden max-w-2xl text-center text-zinc-400 sm:block ${
               workVisible ? "is-visible" : ""
             }`}
             style={{ transitionDelay: "0.08s" }}
@@ -698,11 +793,11 @@ export default function Home() {
             Proudly providing landscaping services throughout Columbus and nearby communities.
           </p>
 
-          <div className="mx-auto grid max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mx-auto mt-4 grid max-w-5xl grid-cols-2 gap-4 sm:mt-0 lg:grid-cols-4">
             {SERVICE_AREAS.map((city, index) => (
               <div
                 key={city}
-                className={`area-pill work-reveal flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-[#151515] px-4 py-3 text-sm font-medium text-zinc-200 ${
+                className={`area-pill work-reveal pointer-events-none flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-[#151515] px-4 py-3 text-sm font-medium text-zinc-200 sm:pointer-events-auto ${
                   workVisible ? "is-visible" : ""
                 }`}
               >
@@ -718,30 +813,40 @@ export default function Home() {
             }`}
             style={{ transitionDelay: "0.2s" }}
           >
-            <span>Not sure if we service your area? Give us a call. </span>
-            <a href={PHONE} className="font-semibold text-[#39ff14] transition-colors hover:text-[#5fff3d]">
-              {PHONE_DISPLAY}
-            </a>
+            <span className="block sm:hidden">Not sure if we service your area?</span>
+            <span className="block whitespace-nowrap sm:hidden">
+              Give us a call.{" "}
+              <a href={PHONE} className="font-semibold text-[#39ff14] transition-colors hover:text-[#5fff3d]">
+                {PHONE_DISPLAY}
+              </a>
+            </span>
+            <span className="hidden sm:inline">
+              Not sure if we service your area? Give us a call.{" "}
+              <a href={PHONE} className="font-semibold text-[#39ff14] transition-colors hover:text-[#5fff3d]">
+                {PHONE_DISPLAY}
+              </a>
+            </span>
           </div>
         </div>
       </section>
 
       {/* Final CTA */}
-      <section id="get-started" className="border-t border-white/5 bg-[#0b0b0b] px-4 py-24 sm:px-6">
+      <section id="get-started" className="border-t border-white/5 bg-[#0b0b0b] px-4 py-16 sm:px-6 sm:py-24">
         <div className="mx-auto max-w-5xl">
-          <div className="final-cta-shell rounded-3xl border border-white/10 px-6 py-14 text-center sm:px-10">
+          <div className="final-cta-shell rounded-3xl border border-white/10 px-5 py-12 text-center sm:px-10 sm:py-14">
             <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-[#39ff14]">
               Get Started
             </p>
             <h2
-              className={`work-reveal mb-4 text-4xl font-bold sm:text-5xl ${
+              className={`work-reveal mb-4 text-3xl leading-tight font-bold sm:text-5xl ${
                 workVisible ? "is-visible" : ""
               }`}
             >
-              Ready to Transform Your Yard?
+              <span className="sm:hidden">Transform Your Yard?</span>
+              <span className="hidden sm:inline">Ready to Transform Your Yard?</span>
             </h2>
             <p
-              className={`work-reveal mx-auto mb-14 max-w-none whitespace-nowrap text-sm text-zinc-300 sm:text-base ${
+              className={`work-reveal mx-auto mb-10 max-w-xl text-sm leading-relaxed text-zinc-300 sm:mb-14 sm:max-w-2xl sm:text-base md:max-w-none md:whitespace-nowrap ${
                 workVisible ? "is-visible" : ""
               }`}
               style={{ transitionDelay: "0.08s" }}
@@ -750,7 +855,7 @@ export default function Home() {
             </p>
 
             <div
-              className={`work-reveal mb-6 flex flex-col items-center justify-center gap-4 sm:flex-row ${
+              className={`work-reveal mt-3 mb-6 flex flex-col items-center justify-center gap-4 sm:mt-0 sm:flex-row ${
                 workVisible ? "is-visible" : ""
               }`}
               style={{ transitionDelay: "0.12s" }}
@@ -772,21 +877,24 @@ export default function Home() {
             </div>
 
             <p
-              className={`work-reveal text-sm text-zinc-300 ${workVisible ? "is-visible" : ""}`}
+              className={`work-reveal mx-auto flex max-w-sm flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-zinc-300 sm:max-w-none ${workVisible ? "is-visible" : ""}`}
               style={{ transitionDelay: "0.16s" }}
             >
               <span className="text-[#39ff14]">✔</span> Free Estimates{" "}
-              <span className="mx-2 text-zinc-600">|</span>
+              <span className="mx-1 text-zinc-600">|</span>
               <span className="text-[#39ff14]">✔</span> Fast Scheduling{" "}
-              <span className="mx-2 text-zinc-600">|</span>
-              <span className="text-[#39ff14]">✔</span> Locally Owned
+              <span className="hidden sm:inline">
+                <span className="mx-1 text-zinc-600">|</span>
+                <span className="text-[#39ff14]">✔</span> Locally Owned
+              </span>
             </p>
 
             <p
-              className={`work-reveal mt-3 text-xs text-zinc-500 ${workVisible ? "is-visible" : ""}`}
+              className={`work-reveal mt-5 text-xs text-zinc-500 sm:mt-3 ${workVisible ? "is-visible" : ""}`}
               style={{ transitionDelay: "0.2s" }}
             >
-              Proudly serving Columbus, Ohio and surrounding areas.
+              <span className="sm:hidden">Serving Columbus, Ohio and surrounding areas.</span>
+              <span className="hidden sm:inline">Proudly serving Columbus, Ohio and surrounding areas.</span>
             </p>
           </div>
         </div>
@@ -833,6 +941,14 @@ function PhoneIcon({ className }: { className?: string }) {
         strokeWidth={2}
         d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
       />
+    </svg>
+  );
+}
+
+function HamburgerIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7h16M4 12h16M4 17h16" />
     </svg>
   );
 }

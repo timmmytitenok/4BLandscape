@@ -550,3 +550,27 @@ body {
   pointer-events: none;
 }
 
+@media (max-width: 767px) {
+  .cta-main-primary:hover,
+  .cta-main-secondary:hover,
+  .work-gallery-card:hover,
+  .trust-card:hover,
+  .process-card:hover,
+  .area-pill:hover {
+    transform: none;
+    box-shadow: none;
+    filter: none;
+  }
+
+  .service-edge-button {
+    height: 3.5rem;
+    width: 3.5rem;
+    top: 58%;
+  }
+
+  .service-edge-button-icon svg {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+}
+
