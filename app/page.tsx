@@ -680,14 +680,14 @@ export default function Home() {
                 aria-label="Toggle before and after view"
               >
                 <img
-                  src="/work/before-3.png"
+                  src="/work/after-3.png"
                   alt="Before landscaping work"
                   className={`h-full w-full object-cover transition-all duration-700 ease-out ${
                     workToggledIds.has("work-3") ? "opacity-0" : "opacity-100"
                   } sm:group-hover:scale-[1.01] sm:group-hover:opacity-0 sm:group-hover:brightness-90`}
                 />
                 <img
-                  src="/work/after-3.png"
+                  src="/work/before-3.png"
                   alt="After landscaping work"
                   className={`absolute inset-0 z-10 h-full w-full scale-[1.01] object-cover transition-all duration-700 ease-out ${
                     workToggledIds.has("work-3") ? "opacity-100" : "opacity-0"
