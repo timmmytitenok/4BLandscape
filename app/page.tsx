@@ -850,7 +850,7 @@ export default function Home() {
                 {WHY_CHOOSE_BENEFITS.map((item) => (
                   <li
                     key={item}
-                    className="flex items-start gap-3 rounded-xl px-1.5 py-1.5 text-base leading-6 text-zinc-300 transition-all duration-300 sm:gap-4 sm:px-2 sm:py-1 sm:text-lg sm:leading-8 sm:hover:translate-x-2 sm:hover:text-zinc-100"
+                    className="flex items-start gap-3 rounded-xl px-1.5 py-1.5 text-base leading-6 text-zinc-300 sm:gap-4 sm:px-2 sm:py-1 sm:text-lg sm:leading-8"
                   >
                     <CheckMarkIcon className="mt-1 h-5 w-5 shrink-0 text-[#39ff14] sm:h-6 sm:w-6" />
                     <span>{item}</span>
