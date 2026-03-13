@@ -124,10 +124,10 @@ export default function Home() {
     if (!serviceTitle.exiting) return;
     const t = setTimeout(
       () => setServiceTitle((s) => (s.exiting ? { ...s, exiting: null } : s)),
-      520
+      320
     );
     return () => clearTimeout(t);
-  }, [serviceTitle.exiting]);
+  }, [serviceTitle.exiting ?? ""]);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
   const [navBarVisible, setNavBarVisible] = useState(true);
   const [serviceEdgeHover, setServiceEdgeHover] = useState<"left" | "right" | null>(null);
@@ -154,7 +154,11 @@ export default function Home() {
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 639px)");
-    const applyViewportMode = () => setIsMobileViewport(media.matches);
+    const applyViewportMode = () => {
+      const mobile = media.matches;
+      setIsMobileViewport(mobile);
+      if (mobile) setNavBarVisible(true);
+    };
     applyViewportMode();
     media.addEventListener("change", applyViewportMode);
     return () => media.removeEventListener("change", applyViewportMode);
@@ -268,22 +272,27 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    const isMobile = () => window.matchMedia("(max-width: 639px)").matches;
     let lastY = window.scrollY;
     let rafId = 0;
 
     const onScroll = () => {
       if (rafId) return;
       rafId = window.requestAnimationFrame(() => {
+        if (isMobile()) {
+          setNavBarVisible(true);
+          lastY = window.scrollY;
+          rafId = 0;
+          return;
+        }
         const currentY = window.scrollY;
         const delta = currentY - lastY;
 
         if (currentY <= 8) {
           setNavBarVisible(true);
         } else if (delta > 3) {
-          // Scroll down: hide quickly.
           setNavBarVisible(false);
         } else if (delta < -1) {
-          // Tiny upward scroll: reveal immediately.
           setNavBarVisible(true);
         }
 
@@ -377,7 +386,7 @@ export default function Home() {
             background: "linear-gradient(180deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.88) 50%, rgba(10,10,10,0.96) 100%)",
           }}
         />
-        <div className="absolute inset-0 z-[2]">
+        <div className="absolute inset-0 z-[2] opacity-40 sm:opacity-100">
           <LightRays
             raysOrigin="top-center"
             raysColor="#ffffff"
@@ -470,11 +479,11 @@ export default function Home() {
           <CircularGalleryAny
             ref={serviceGalleryRef}
             items={SERVICE_GALLERY_ITEMS}
-            bend={isMobileViewport ? 0.72 : 1}
+            bend={isMobileViewport ? 0 : 1}
             textColor="#ffffff"
             borderRadius={0.05}
-            scrollSpeed={isMobileViewport ? 1.2 : 2}
-            scrollEase={isMobileViewport ? 0.08 : 0.05}
+            scrollSpeed={isMobileViewport ? 2.5 : 2}
+            scrollEase={isMobileViewport ? 0.18 : 0.05}
             onCurrentItemChange={isMobileViewport ? handleServiceItemChange : undefined}
           />
           <button

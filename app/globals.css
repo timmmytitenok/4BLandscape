@@ -116,12 +116,12 @@ body {
 }
 
 .animate-service-title-in {
-  animation: service-title-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: service-title-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
   will-change: filter, opacity;
 }
 
 .animate-service-title-out {
-  animation: service-title-out 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: service-title-out 0.28s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   will-change: filter, opacity;
 }
 
