@@ -80,6 +80,51 @@ body {
   opacity: 0;
 }
 
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.35s ease-out forwards;
+}
+
+@keyframes service-title-in {
+  from {
+    filter: blur(16px);
+    opacity: 0;
+  }
+  to {
+    filter: blur(0);
+    opacity: 1;
+  }
+}
+
+@keyframes service-title-out {
+  from {
+    filter: blur(0);
+    opacity: 1;
+  }
+  to {
+    filter: blur(16px);
+    opacity: 0;
+  }
+}
+
+.animate-service-title-in {
+  animation: service-title-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+  will-change: filter, opacity;
+}
+
+.animate-service-title-out {
+  animation: service-title-out 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  will-change: filter, opacity;
+}
+
 @keyframes hero-load-motion {
   0% {
     opacity: 0;

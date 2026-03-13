@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import CircularGallery from "./components/CircularGallery";
 import LightRays from "./components/LightRays";
 const CircularGalleryAny = CircularGallery as any;
@@ -14,7 +14,7 @@ const SERVICE_CATEGORIES = [
       { name: "Grass Seeding", Icon: LawnIcon, description: "Overseeding and new seed application for thicker lawns." },
       { name: "Brick Edging", Icon: EdgingIcon, description: "Crisp brick edging for beds and walkways." },
       { name: "Lawn Mowing", Icon: LawnIcon, description: "Routine mowing for clean, even lawns." },
-      { name: "Tree Services", Icon: SeasonalIcon, description: "General trimming and tree service support." },
+      { name: "Tree Cutting", Icon: SeasonalIcon, description: "General trimming and tree service support." },
       { name: "Land Clearing", Icon: CleanupIcon, description: "Brush and debris clearing for open usable space." },
       { name: "Fence Installation", Icon: FenceIcon, description: "Fence installation and property boundary upgrades." },
       { name: "Patio Builds", Icon: LandscapeIcon, description: "Patio installations for outdoor living spaces." },
@@ -35,7 +35,7 @@ const SERVICE_GALLERY_ITEMS = SERVICE_CATEGORIES.flatMap((category) =>
               ? "/gallery/sod-installation.png"
               : service.name.trim() === "Grass Seeding"
                 ? "/gallery/grass-seeding.png"
-              : service.name.trim() === "Tree Services"
+              : service.name.trim() === "Tree Cutting"
                 ? "/gallery/tree-services.png"
               : service.name.trim() === "Fence Installation"
                 ? "/gallery/fence-installation.png"
@@ -85,8 +85,51 @@ const NAV_ITEMS = [
 
 export default function Home() {
   const [workVisible, setWorkVisible] = useState(false);
-  const [activeWorkHoldId, setActiveWorkHoldId] = useState<string | null>(null);
+  const [workToggledIds, setWorkToggledIds] = useState<Set<string>>(new Set());
+  const [serviceTitle, setServiceTitle] = useState({
+    current: SERVICE_GALLERY_ITEMS[0]?.text ?? "Services",
+    exiting: null as string | null,
+  });
+  const currentServiceName = serviceTitle.current;
+  const handleServiceItemChange = useCallback(({ item }: { item: { text: string } }) => {
+    const next = item?.text ?? "Services";
+    setServiceTitle((prev) => {
+      if (prev.current === next) return prev;
+      return { current: next, exiting: prev.current };
+    });
+  }, []);
+
+  const goToNextService = useCallback(() => {
+    const idx = SERVICE_GALLERY_ITEMS.findIndex((i) => i.text === serviceTitle.current);
+    const nextIdx = idx < 0 ? 0 : (idx + 1) % SERVICE_GALLERY_ITEMS.length;
+    const next = SERVICE_GALLERY_ITEMS[nextIdx]?.text ?? "Services";
+    setServiceTitle((prev) => {
+      if (prev.current === next) return prev;
+      return { current: next, exiting: prev.current };
+    });
+    serviceGalleryRef.current?.nudgeRight();
+  }, [serviceTitle.current]);
+
+  const goToPrevService = useCallback(() => {
+    const idx = SERVICE_GALLERY_ITEMS.findIndex((i) => i.text === serviceTitle.current);
+    const nextIdx = idx <= 0 ? SERVICE_GALLERY_ITEMS.length - 1 : idx - 1;
+    const next = SERVICE_GALLERY_ITEMS[nextIdx]?.text ?? "Services";
+    setServiceTitle((prev) => {
+      if (prev.current === next) return prev;
+      return { current: next, exiting: prev.current };
+    });
+    serviceGalleryRef.current?.nudgeLeft();
+  }, [serviceTitle.current]);
+  useEffect(() => {
+    if (!serviceTitle.exiting) return;
+    const t = setTimeout(
+      () => setServiceTitle((s) => (s.exiting ? { ...s, exiting: null } : s)),
+      520
+    );
+    return () => clearTimeout(t);
+  }, [serviceTitle.exiting]);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [navBarVisible, setNavBarVisible] = useState(true);
   const [serviceEdgeHover, setServiceEdgeHover] = useState<"left" | "right" | null>(null);
   const [serviceButtonHover, setServiceButtonHover] = useState<"left" | "right" | null>(null);
   const [serviceButtonOpacity, setServiceButtonOpacity] = useState({ left: 0, right: 0 });
@@ -100,8 +143,14 @@ export default function Home() {
     el?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleWorkHoldStart = (id: string) => setActiveWorkHoldId(id);
-  const handleWorkHoldEnd = () => setActiveWorkHoldId(null);
+  const toggleWorkImage = (id: string) => {
+    setWorkToggledIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 639px)");
@@ -218,13 +267,47 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    let lastY = window.scrollY;
+    let rafId = 0;
+
+    const onScroll = () => {
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(() => {
+        const currentY = window.scrollY;
+        const delta = currentY - lastY;
+
+        if (currentY <= 8) {
+          setNavBarVisible(true);
+        } else if (delta > 3) {
+          // Scroll down: hide quickly.
+          setNavBarVisible(false);
+        } else if (delta < -1) {
+          // Tiny upward scroll: reveal immediately.
+          setNavBarVisible(true);
+        }
+
+        lastY = currentY;
+        rafId = 0;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#0a0a0a] text-white">
       {/* Fixed Nav */}
       <nav
-        className="nav-slide nav-visible fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/30 backdrop-blur-xl hover:border-white/20"
+        className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/30 backdrop-blur-xl hover:border-white/20 will-change-transform transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          navBarVisible ? "translate-y-0" : "-translate-y-[120%]"
+        }`}
       >
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-5 sm:px-6 sm:py-4">
           {/* Logo - left */}
           <a
             href="/"
@@ -232,7 +315,7 @@ export default function Home() {
               e.preventDefault();
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
-            className="w-fit shrink-0 text-base font-bold tracking-tight text-white transition-transform duration-300 hover:scale-105 sm:text-lg"
+            className="w-fit shrink-0 text-xl font-bold tracking-tight text-white transition-transform duration-300 hover:scale-105 sm:text-lg"
           >
             4B<span className="text-[#39ff14]">Landscape</span>
           </a>
@@ -270,29 +353,13 @@ export default function Home() {
             </a>
           </div>
 
-          {/* Mobile actions */}
-          <div className="flex items-center gap-2 md:hidden">
-            <a
-              href={PHONE}
-              className="inline-flex items-center justify-center rounded-lg bg-[#39ff14] px-3 py-2 text-xs font-semibold text-black shadow-lg shadow-[#39ff14]/20 transition-all duration-300 active:scale-[0.98]"
-            >
-              Call
-            </a>
-            <button
-              type="button"
-              aria-label="Open navigation menu"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/20 bg-white/5 text-white transition-colors duration-300 hover:border-white/35 hover:bg-white/10"
-            >
-              <HamburgerIcon className="h-5 w-5" />
-            </button>
-          </div>
         </div>
       </nav>
 
       {/* Hero Section - Full Screen */}
       <section
         id="hero-section"
-        className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 pt-24 sm:px-6"
+        className="relative flex min-h-[82vh] flex-col items-center justify-center overflow-hidden px-4 pt-24 sm:min-h-screen sm:px-6"
       >
         {/* Background image - slightly blurred */}
         <div
@@ -330,7 +397,7 @@ export default function Home() {
 
         <div
           ref={heroLoadRef}
-          className="hero-load-root relative z-10 mx-auto mt-0 flex w-full max-w-4xl flex-col items-center text-center sm:-mt-10"
+          className="hero-load-root relative z-10 mx-auto -mt-14 flex w-full max-w-4xl flex-col items-center text-center sm:-mt-10"
         >
           {/* Subtle green glow behind title */}
           <div
@@ -341,13 +408,14 @@ export default function Home() {
           />
 
           {/* Title - dominant focal point */}
-          <h1 className="hero-load-item hero-load-1 relative mb-5 text-4xl font-extrabold leading-[1.1] tracking-tight sm:mb-6 sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl">
+          <h1 className="hero-load-item hero-load-1 relative mx-auto mb-5 text-center text-[14.2vw] font-extrabold leading-[1.05] tracking-tight whitespace-nowrap sm:mb-6 sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl">
             4B<span className="text-[#39ff14]">Landscape</span>
           </h1>
 
           {/* Subtitle */}
-          <p className="hero-load-item hero-load-2 relative mx-auto mb-16 max-w-xl text-base text-zinc-400 sm:mb-24 sm:text-lg md:text-xl">
-            Keeping Columbus yards clean, healthy, and looking their best.
+          <p className="hero-load-item hero-load-2 relative mx-auto mb-20 max-w-xl text-base text-zinc-400 sm:mb-24 sm:text-lg md:max-w-none md:text-xl md:whitespace-nowrap">
+            <span className="sm:hidden">Keeping Columbus Ohio yards clean.</span>
+            <span className="hidden sm:inline">Keeping Columbus Ohio yards clean, healthy, and looking their best.</span>
           </p>
 
           {/* CTA Buttons */}
@@ -378,18 +446,15 @@ export default function Home() {
       {/* Services Section */}
       <section
         id="services"
-        className="scroll-mt-20 border-t border-white/5 bg-[#0f0f0f] px-4 pt-28 pb-20 sm:px-6"
+        className="scroll-mt-20 border-t border-white/5 bg-[#0f0f0f] px-4 pt-16 pb-20 sm:px-6 sm:pt-28"
       >
         <div className="mx-auto max-w-6xl">
           <h2 className="mb-8 text-center text-3xl font-bold sm:text-5xl">
             <span className="block whitespace-nowrap sm:hidden">Explore Our Services</span>
             <span className="hidden sm:inline">Explore Our Landscaping Services</span>
           </h2>
-          <p className="text-center text-sm text-zinc-400 sm:text-base">
+          <p className="hidden text-center text-sm text-zinc-400 sm:block sm:text-base">
             Swipe to explore services -&gt;
-          </p>
-          <p className="mt-2 text-center text-xs text-zinc-500 sm:hidden">
-            Drag left or right to browse services
           </p>
         </div>
 
@@ -410,6 +475,7 @@ export default function Home() {
             borderRadius={0.05}
             scrollSpeed={isMobileViewport ? 1.2 : 2}
             scrollEase={isMobileViewport ? 0.08 : 0.05}
+            onCurrentItemChange={isMobileViewport ? handleServiceItemChange : undefined}
           />
           <button
             type="button"
@@ -451,26 +517,45 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="mt-4 flex items-center justify-center gap-3 sm:hidden">
+        <div
+          className="service-mobile-title relative mt-2 min-h-[3rem] text-center text-3xl font-bold text-white sm:hidden"
+          aria-live="polite"
+        >
+          {serviceTitle.exiting && (
+            <span
+              className="service-mobile-title-text pointer-events-none absolute inset-x-0 top-0 block animate-service-title-out"
+              aria-hidden
+            >
+              {serviceTitle.exiting.trim() === "Gravel/Mulch Deliveries"
+                ? "Gravel Deliveries"
+                : serviceTitle.exiting}
+            </span>
+          )}
+          <span key={currentServiceName} className="service-mobile-title-text relative block animate-service-title-in">
+            {currentServiceName.trim() === "Gravel/Mulch Deliveries" ? "Gravel Deliveries" : currentServiceName}
+          </span>
+        </div>
+
+        <div className="mt-6 mb-6 flex items-center justify-center gap-3 sm:hidden">
           <button
             type="button"
             aria-label="Scroll services left"
-            onClick={() => serviceGalleryRef.current?.nudgeLeft()}
-            className="inline-flex items-center justify-center rounded-lg border border-white/20 bg-[#111111] px-4 py-2 text-xs font-semibold text-zinc-200"
+            onClick={goToPrevService}
+            className="inline-flex items-center justify-center rounded-lg border border-white/20 bg-[#111111] px-5 py-2.5 text-sm font-semibold text-zinc-200"
           >
             Prev
           </button>
           <button
             type="button"
             aria-label="Scroll services right"
-            onClick={() => serviceGalleryRef.current?.nudgeRight()}
-            className="inline-flex items-center justify-center rounded-lg border border-white/20 bg-[#111111] px-4 py-2 text-xs font-semibold text-zinc-200"
+            onClick={goToNextService}
+            className="inline-flex items-center justify-center rounded-lg border border-white/20 bg-[#111111] px-5 py-2.5 text-sm font-semibold text-zinc-200"
           >
             Next
           </button>
         </div>
 
-        <div className="mx-auto mt-14 flex max-w-6xl flex-col items-center px-4 pb-4">
+        <div className="mx-auto mt-20 flex max-w-6xl flex-col items-center px-4 pb-4 sm:mt-14">
           <div className="flex w-full max-w-2xl flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <a
               href={PHONE}
@@ -519,150 +604,180 @@ export default function Home() {
               See how our work can completely transform a property.
             </p>
             <p className="mb-4 text-center text-xs font-medium text-[#39ff14] sm:hidden">
-              Press and hold any image to reveal the after result.
+              Tap any image to switch between before and after.
             </p>
 
             <div className="grid grid-cols-2 gap-x-4 gap-y-4 sm:gap-x-6 sm:gap-y-8 md:grid-cols-3 md:gap-x-8 md:gap-y-8">
               <div
-                className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out sm:aspect-square sm:rounded-2xl sm:hover:scale-[1.02] sm:hover:border-[#39ff14]/60 sm:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]"
-                onTouchStart={() => handleWorkHoldStart("work-1")}
-                onTouchEnd={handleWorkHoldEnd}
-                onTouchCancel={handleWorkHoldEnd}
+                className="group relative aspect-[4/5] cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out sm:aspect-square sm:rounded-2xl sm:hover:scale-[1.02] sm:hover:border-[#39ff14]/60 sm:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)] sm:cursor-default"
+                onClick={() => window.innerWidth < 640 && toggleWorkImage("work-1")}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === "Enter" && window.innerWidth < 640 && toggleWorkImage("work-1")}
+                aria-label="Toggle before and after view"
               >
                 <img
                   src="/work/before-1.png"
                   alt="Before landscaping work"
                   className={`h-full w-full object-cover transition-all duration-700 ease-out ${
-                    activeWorkHoldId === "work-1" ? "opacity-0" : "opacity-100"
+                    workToggledIds.has("work-1") ? "opacity-0" : "opacity-100"
                   } sm:group-hover:scale-[1.01] sm:group-hover:opacity-0 sm:group-hover:brightness-90`}
                 />
                 <img
                   src="/work/after-1.png"
                   alt="After landscaping work"
                   className={`absolute inset-0 z-10 h-full w-full scale-[1.01] object-cover transition-all duration-700 ease-out ${
-                    activeWorkHoldId === "work-1" ? "opacity-100" : "opacity-0"
+                    workToggledIds.has("work-1") ? "opacity-100" : "opacity-0"
                   } sm:group-hover:scale-100 sm:group-hover:opacity-100 sm:group-hover:brightness-90`}
                 />
+                <div className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-200 sm:hidden">
+                  {workToggledIds.has("work-1") ? "After" : "Before"}
+                </div>
                 <div className="pointer-events-none absolute bottom-3 left-3 hidden rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200 sm:block">
                   Press or hover to reveal after
                 </div>
               </div>
               <div
-                className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out sm:aspect-square sm:rounded-2xl sm:hover:scale-[1.02] sm:hover:border-[#39ff14]/60 sm:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]"
-                onTouchStart={() => handleWorkHoldStart("work-2")}
-                onTouchEnd={handleWorkHoldEnd}
-                onTouchCancel={handleWorkHoldEnd}
+                className="group relative aspect-[4/5] cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out sm:aspect-square sm:rounded-2xl sm:hover:scale-[1.02] sm:hover:border-[#39ff14]/60 sm:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)] sm:cursor-default"
+                onClick={() => window.innerWidth < 640 && toggleWorkImage("work-2")}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === "Enter" && window.innerWidth < 640 && toggleWorkImage("work-2")}
+                aria-label="Toggle before and after view"
               >
                 <img
                   src="/work/before-2.png"
                   alt="Before landscaping work"
                   className={`h-full w-full object-cover transition-all duration-700 ease-out ${
-                    activeWorkHoldId === "work-2" ? "opacity-0" : "opacity-100"
+                    workToggledIds.has("work-2") ? "opacity-0" : "opacity-100"
                   } sm:group-hover:scale-[1.01] sm:group-hover:opacity-0 sm:group-hover:brightness-90`}
                 />
                 <img
                   src="/work/after-2.png"
                   alt="After landscaping work"
                   className={`absolute inset-0 z-10 h-full w-full scale-[1.01] object-cover transition-all duration-700 ease-out ${
-                    activeWorkHoldId === "work-2" ? "opacity-100" : "opacity-0"
+                    workToggledIds.has("work-2") ? "opacity-100" : "opacity-0"
                   } sm:group-hover:scale-100 sm:group-hover:opacity-100 sm:group-hover:brightness-90`}
                 />
+                <div className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-200 sm:hidden">
+                  {workToggledIds.has("work-2") ? "After" : "Before"}
+                </div>
                 <div className="pointer-events-none absolute bottom-3 left-3 hidden rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200 sm:block">
                   Press or hover to reveal after
                 </div>
               </div>
               <div
-                className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out sm:aspect-square sm:rounded-2xl sm:hover:scale-[1.02] sm:hover:border-[#39ff14]/60 sm:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]"
-                onTouchStart={() => handleWorkHoldStart("work-3")}
-                onTouchEnd={handleWorkHoldEnd}
-                onTouchCancel={handleWorkHoldEnd}
+                className="group relative aspect-[4/5] cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out sm:aspect-square sm:rounded-2xl sm:hover:scale-[1.02] sm:hover:border-[#39ff14]/60 sm:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)] sm:cursor-default"
+                onClick={() => window.innerWidth < 640 && toggleWorkImage("work-3")}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === "Enter" && window.innerWidth < 640 && toggleWorkImage("work-3")}
+                aria-label="Toggle before and after view"
               >
                 <img
                   src="/work/before-3.png"
                   alt="Before landscaping work"
                   className={`h-full w-full object-cover transition-all duration-700 ease-out ${
-                    activeWorkHoldId === "work-3" ? "opacity-0" : "opacity-100"
+                    workToggledIds.has("work-3") ? "opacity-0" : "opacity-100"
                   } sm:group-hover:scale-[1.01] sm:group-hover:opacity-0 sm:group-hover:brightness-90`}
                 />
                 <img
                   src="/work/after-3.png"
                   alt="After landscaping work"
                   className={`absolute inset-0 z-10 h-full w-full scale-[1.01] object-cover transition-all duration-700 ease-out ${
-                    activeWorkHoldId === "work-3" ? "opacity-100" : "opacity-0"
+                    workToggledIds.has("work-3") ? "opacity-100" : "opacity-0"
                   } sm:group-hover:scale-100 sm:group-hover:opacity-100 sm:group-hover:brightness-90`}
                 />
+                <div className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-200 sm:hidden">
+                  {workToggledIds.has("work-3") ? "After" : "Before"}
+                </div>
                 <div className="pointer-events-none absolute bottom-3 left-3 hidden rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200 sm:block">
                   Press or hover to reveal after
                 </div>
               </div>
               <div
-                className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out sm:aspect-square sm:rounded-2xl sm:hover:scale-[1.02] sm:hover:border-[#39ff14]/60 sm:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]"
-                onTouchStart={() => handleWorkHoldStart("work-4")}
-                onTouchEnd={handleWorkHoldEnd}
-                onTouchCancel={handleWorkHoldEnd}
+                className="group relative aspect-[4/5] cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out sm:aspect-square sm:rounded-2xl sm:hover:scale-[1.02] sm:hover:border-[#39ff14]/60 sm:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)] sm:cursor-default"
+                onClick={() => window.innerWidth < 640 && toggleWorkImage("work-4")}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === "Enter" && window.innerWidth < 640 && toggleWorkImage("work-4")}
+                aria-label="Toggle before and after view"
               >
                 <img
                   src="/work/before-4.png"
                   alt="Before landscaping work"
                   className={`h-full w-full object-cover transition-all duration-700 ease-out ${
-                    activeWorkHoldId === "work-4" ? "opacity-0" : "opacity-100"
+                    workToggledIds.has("work-4") ? "opacity-0" : "opacity-100"
                   } sm:group-hover:scale-[1.01] sm:group-hover:opacity-0 sm:group-hover:brightness-90`}
                 />
                 <img
                   src="/work/after-4.png"
                   alt="After landscaping work"
                   className={`absolute inset-0 z-10 h-full w-full object-cover transition-all duration-700 ease-out ${
-                    activeWorkHoldId === "work-4" ? "opacity-100" : "opacity-0"
+                    workToggledIds.has("work-4") ? "opacity-100" : "opacity-0"
                   } sm:group-hover:opacity-100 sm:group-hover:brightness-90`}
                 />
+                <div className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-200 sm:hidden">
+                  {workToggledIds.has("work-4") ? "After" : "Before"}
+                </div>
                 <div className="pointer-events-none absolute bottom-3 left-3 hidden rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200 sm:block">
                   Press or hover to reveal after
                 </div>
               </div>
               <div
-                className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out sm:aspect-square sm:rounded-2xl sm:hover:scale-[1.02] sm:hover:border-[#39ff14]/60 sm:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]"
-                onTouchStart={() => handleWorkHoldStart("work-5")}
-                onTouchEnd={handleWorkHoldEnd}
-                onTouchCancel={handleWorkHoldEnd}
+                className="group relative aspect-[4/5] cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out sm:aspect-square sm:rounded-2xl sm:hover:scale-[1.02] sm:hover:border-[#39ff14]/60 sm:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)] sm:cursor-default"
+                onClick={() => window.innerWidth < 640 && toggleWorkImage("work-5")}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === "Enter" && window.innerWidth < 640 && toggleWorkImage("work-5")}
+                aria-label="Toggle before and after view"
               >
                 <img
                   src="/work/before-5.png"
                   alt="Before landscaping work"
                   className={`h-full w-full object-cover transition-all duration-700 ease-out ${
-                    activeWorkHoldId === "work-5" ? "opacity-0" : "opacity-100"
+                    workToggledIds.has("work-5") ? "opacity-0" : "opacity-100"
                   } sm:group-hover:scale-[1.01] sm:group-hover:opacity-0 sm:group-hover:brightness-90`}
                 />
                 <img
                   src="/work/after-5.png"
                   alt="After landscaping work"
                   className={`absolute inset-0 z-10 h-full w-full object-cover transition-all duration-700 ease-out ${
-                    activeWorkHoldId === "work-5" ? "opacity-100" : "opacity-0"
+                    workToggledIds.has("work-5") ? "opacity-100" : "opacity-0"
                   } sm:group-hover:opacity-100 sm:group-hover:brightness-90`}
                 />
+                <div className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-200 sm:hidden">
+                  {workToggledIds.has("work-5") ? "After" : "Before"}
+                </div>
                 <div className="pointer-events-none absolute bottom-3 left-3 hidden rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200 sm:block">
                   Press or hover to reveal after
                 </div>
               </div>
               <div
-                className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out sm:aspect-square sm:rounded-2xl sm:hover:scale-[1.02] sm:hover:border-[#39ff14]/60 sm:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]"
-                onTouchStart={() => handleWorkHoldStart("work-6")}
-                onTouchEnd={handleWorkHoldEnd}
-                onTouchCancel={handleWorkHoldEnd}
+                className="group relative aspect-[4/5] cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-[#141414] shadow-xl shadow-black/35 transition-all duration-300 ease-out sm:aspect-square sm:rounded-2xl sm:hover:scale-[1.02] sm:hover:border-[#39ff14]/60 sm:hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)] sm:cursor-default"
+                onClick={() => window.innerWidth < 640 && toggleWorkImage("work-6")}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === "Enter" && window.innerWidth < 640 && toggleWorkImage("work-6")}
+                aria-label="Toggle before and after view"
               >
                 <img
                   src="/work/before-6.png"
                   alt="Before landscaping work"
                   className={`h-full w-full object-cover transition-all duration-700 ease-out ${
-                    activeWorkHoldId === "work-6" ? "opacity-0" : "opacity-100"
+                    workToggledIds.has("work-6") ? "opacity-0" : "opacity-100"
                   } sm:group-hover:scale-[1.01] sm:group-hover:opacity-0 sm:group-hover:brightness-90`}
                 />
                 <img
                   src="/work/after-6.png"
                   alt="After landscaping work"
                   className={`absolute inset-0 z-10 h-full w-full object-cover transition-all duration-700 ease-out ${
-                    activeWorkHoldId === "work-6" ? "opacity-100" : "opacity-0"
+                    workToggledIds.has("work-6") ? "opacity-100" : "opacity-0"
                   } sm:group-hover:opacity-100 sm:group-hover:brightness-90`}
                 />
+                <div className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-200 sm:hidden">
+                  {workToggledIds.has("work-6") ? "After" : "Before"}
+                </div>
                 <div className="pointer-events-none absolute bottom-3 left-3 hidden rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200 sm:block">
                   Press or hover to reveal after
                 </div>
@@ -941,14 +1056,6 @@ function PhoneIcon({ className }: { className?: string }) {
         strokeWidth={2}
         d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
       />
-    </svg>
-  );
-}
-
-function HamburgerIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7h16M4 12h16M4 17h16" />
     </svg>
   );
 }

@@ -19,11 +19,12 @@ const TITLE_VERTEX_SHADER = `
 const TITLE_FRAGMENT_SHADER = `
   precision highp float;
   uniform sampler2D tMap;
+  uniform float uOpacity;
   varying vec2 vUv;
   void main() {
     vec4 color = texture2D(tMap, vUv);
     if (color.a < 0.02) discard;
-    gl_FragColor = color;
+    gl_FragColor = vec4(color.rgb, color.a * uOpacity);
   }
 `;
 
@@ -153,6 +154,7 @@ class Media {
         uniform vec2 uPlaneSizes;
         uniform sampler2D tMap;
         uniform float uBorderRadius;
+        uniform float uOpacity;
         varying vec2 vUv;
 
         float roundedBoxSDF(vec2 p, vec2 b, float r) {
@@ -175,7 +177,7 @@ class Media {
           float edgeSmooth = 0.002;
           float alpha = 1.0 - smoothstep(-edgeSmooth, edgeSmooth, d);
 
-          gl_FragColor = vec4(color.rgb, alpha);
+          gl_FragColor = vec4(color.rgb, alpha * uOpacity);
         }
       `,
       uniforms: {
@@ -185,6 +187,7 @@ class Media {
         uSpeed: { value: 0 },
         uTime: { value: 100 * Math.random() },
         uBorderRadius: { value: this.borderRadius },
+        uOpacity: { value: 1 },
       },
       transparent: true,
     });
@@ -211,7 +214,7 @@ class Media {
     const program = new Program(this.gl, {
       vertex: TITLE_VERTEX_SHADER,
       fragment: TITLE_FRAGMENT_SHADER,
-      uniforms: { tMap: { value: texture } },
+      uniforms: { tMap: { value: texture }, uOpacity: { value: 1 } },
       transparent: true,
       depthTest: false,
       depthWrite: false,
@@ -261,6 +264,26 @@ class Media {
     const viewportOffset = this.viewport.width / 2;
     this.isBefore = this.imagePlane.position.x + planeOffset < -viewportOffset;
     this.isAfter = this.imagePlane.position.x - planeOffset > viewportOffset;
+
+    const isMobile = this.screen && this.screen.width < 640;
+    let opacity = 1;
+    if (isMobile) {
+      const isFullyOffScreen = this.isBefore || this.isAfter;
+      if (isFullyOffScreen) {
+        opacity = 0;
+      } else {
+        const fadeZone = planeOffset * 1.4;
+        const rightEdge = this.imagePlane.position.x + planeOffset;
+        const leftEdge = this.imagePlane.position.x - planeOffset;
+        const fadeOutLeft = Math.max(0, (rightEdge + viewportOffset) / fadeZone);
+        const fadeOutRight = Math.max(0, (viewportOffset - leftEdge) / fadeZone);
+        opacity = Math.min(1, Math.min(fadeOutLeft, fadeOutRight));
+      }
+    }
+    this.imageProgram.uniforms.uOpacity.value = opacity;
+    if (this.titlePlane && this.titlePlane.program && this.titlePlane.program.uniforms.uOpacity) {
+      this.titlePlane.program.uniforms.uOpacity.value = isMobile ? 0 : opacity;
+    }
     if (direction === "right" && this.isBefore) {
       this.extra -= this.widthTotal;
       this.isBefore = this.isAfter = false;
@@ -276,8 +299,9 @@ class Media {
     if (viewport) this.viewport = viewport;
 
     this.scale = this.screen.height / 1500;
-    this.imagePlane.scale.y = (this.viewport.height * (900 * this.scale)) / this.screen.height;
-    this.imagePlane.scale.x = (this.viewport.width * (700 * this.scale)) / this.screen.width;
+    const mobileScale = this.screen.width < 640 ? 1.5 : 1;
+    this.imagePlane.scale.y = ((this.viewport.height * (900 * this.scale)) / this.screen.height) * mobileScale;
+    this.imagePlane.scale.x = ((this.viewport.width * (700 * this.scale)) / this.screen.width) * mobileScale;
     this.imagePlane.program.uniforms.uPlaneSizes.value = [this.imagePlane.scale.x, this.imagePlane.scale.y];
     this.titlePlane.scale.x = this.imagePlane.scale.x * 1.08;
     this.titlePlane.scale.y = this.titlePlane.scale.x / this.titleAspect;
@@ -299,10 +323,12 @@ class App {
       font = "bold 30px sans-serif",
       scrollSpeed = 2,
       scrollEase = 0.05,
+      onCurrentItemChange,
     } = {}
   ) {
     this.container = container;
     this.scrollSpeed = scrollSpeed;
+    this.onCurrentItemChange = onCurrentItemChange;
     this.scroll = { ease: scrollEase, current: 0, target: 0, last: 0 };
     this.onCheckDebounce = debounce(this.onCheck, 200);
     this.createRenderer();
@@ -428,6 +454,17 @@ class App {
     if (this.medias) {
       this.medias.forEach((media) => media.update(this.scroll, direction));
     }
+    if (this.onCurrentItemChange && this.medias && this.medias[0]) {
+      const width = this.medias[0].width;
+      const itemIndex = Math.round(Math.abs(this.scroll.current) / width);
+      const baseLength = this.mediasImages.length / 2;
+      const index = itemIndex % baseLength;
+      const item = this.mediasImages[index];
+      if (item && this._lastItemIndex !== index) {
+        this._lastItemIndex = index;
+        this.onCurrentItemChange({ index, item });
+      }
+    }
     this.renderer.render({ scene: this.scene, camera: this.camera });
     this.scroll.last = this.scroll.current;
     this.raf = window.requestAnimationFrame(this.update.bind(this));
@@ -473,6 +510,7 @@ const CircularGallery = forwardRef(function CircularGallery(
     font = "bold 30px sans-serif",
     scrollSpeed = 2,
     scrollEase = 0.05,
+    onCurrentItemChange,
   },
   ref
 ) {
@@ -498,13 +536,14 @@ const CircularGallery = forwardRef(function CircularGallery(
       font,
       scrollSpeed,
       scrollEase,
+      onCurrentItemChange,
     });
     appRef.current = app;
     return () => {
       app.destroy();
       appRef.current = null;
     };
-  }, [items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase]);
+  }, [items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase, onCurrentItemChange]);
 
   return <div className={styles.circularGallery} ref={containerRef} />;
 });
