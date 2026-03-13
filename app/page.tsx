@@ -455,11 +455,11 @@ export default function Home() {
       {/* Services Section */}
       <section
         id="services"
-        className="scroll-mt-20 border-t border-white/5 bg-[#0f0f0f] px-4 pt-16 pb-20 sm:px-6 sm:pt-28"
+        className="scroll-mt-20 border-t border-white/5 bg-[#0f0f0f] px-4 pt-15 pb-16 sm:px-6 sm:pt-28 sm:pb-20"
       >
         <div className="mx-auto max-w-6xl">
-          <h2 className="mb-8 text-center text-3xl font-bold sm:text-5xl">
-            <span className="block whitespace-nowrap sm:hidden">Explore Our Services</span>
+          <h2 className="mb-6 text-center text-2xl font-bold sm:mb-8 sm:text-5xl">
+            <span className="block sm:hidden">Explore Our Services</span>
             <span className="hidden sm:inline">Explore Our Landscaping Services</span>
           </h2>
           <p className="hidden text-center text-sm text-zinc-400 sm:block sm:text-base">
@@ -468,7 +468,7 @@ export default function Home() {
         </div>
 
         <div
-          className="service-gallery-reveal relative left-1/2 mt-4 h-[430px] w-screen -translate-x-1/2 overflow-visible sm:mt-5 sm:h-[620px] lg:h-[700px]"
+          className="service-gallery-reveal relative left-1/2 mt-2 h-[360px] w-screen -translate-x-1/2 overflow-visible sm:mt-5 sm:h-[620px] lg:h-[700px]"
           onMouseMove={isMobileViewport ? undefined : handleServiceHoverEdge}
           onMouseLeave={() => {
             setServiceEdgeHover(null);
@@ -527,7 +527,7 @@ export default function Home() {
         </div>
 
         <div
-          className="service-mobile-title relative mt-2 min-h-[3rem] text-center text-3xl font-bold text-white sm:hidden"
+          className="service-mobile-title relative mt-4 min-h-[2.75rem] text-center text-2xl font-bold leading-tight text-white sm:hidden"
           aria-live="polite"
         >
           {serviceTitle.exiting && (
@@ -545,7 +545,7 @@ export default function Home() {
           </span>
         </div>
 
-        <div className="mt-6 mb-6 flex items-center justify-center gap-3 sm:hidden">
+        <div className="mt-5 mb-8 flex items-center justify-center gap-4 sm:hidden">
           <button
             type="button"
             aria-label="Scroll services left"
@@ -564,7 +564,7 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="mx-auto mt-20 flex max-w-6xl flex-col items-center px-4 pb-4 sm:mt-14">
+        <div className="mx-auto mt-18 flex max-w-6xl flex-col items-center px-4 pb-4 sm:mt-14">
           <div className="flex w-full max-w-2xl flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <a
               href={PHONE}

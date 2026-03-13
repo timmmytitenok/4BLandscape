@@ -243,44 +243,58 @@ body {
   }
 }
 
-/* Main CTA buttons - consistent premium hover effect */
+/* Main CTA buttons - base transition */
 .cta-main-primary,
 .cta-main-secondary {
   transition:
-    transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.24s ease,
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s ease,
     background-color 0.24s ease,
     border-color 0.24s ease,
-    color 0.24s ease,
-    filter 0.24s ease;
+    color 0.24s ease;
   transform-origin: center;
   will-change: transform;
 }
 
-.cta-main-primary:hover {
-  transform: translateY(-6px) scale(1.045);
-  box-shadow:
-    0 14px 28px rgba(0, 0, 0, 0.38),
-    0 0 16px rgba(57, 255, 20, 0.18);
-  filter: brightness(1.04);
-}
+/* Desktop only: smooth pop-out on hover */
+@media (min-width: 768px) {
+  /* Hero / top section - smooth pop on hover */
+  #hero-section .cta-main-primary:hover,
+  #hero-section .cta-main-secondary:hover {
+    transform: translateY(-12px) scale(1.1);
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.45);
+  }
 
-.cta-main-primary:active {
-  transform: translateY(-2px) scale(1.01);
-}
+  #hero-section .cta-main-primary:active,
+  #hero-section .cta-main-secondary:active {
+    transform: translateY(-6px) scale(1.05);
+  }
 
-.cta-main-secondary:hover {
-  transform: translateY(-6px) scale(1.045);
-  box-shadow:
-    0 14px 28px rgba(0, 0, 0, 0.34),
-    0 0 14px rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.9);
-  filter: brightness(1.03);
-}
+  #hero-section .cta-main-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.9);
+  }
 
-.cta-main-secondary:active {
-  transform: translateY(-2px) scale(1.01);
+  /* Services + Ready to Transform sections */
+  #services .cta-main-primary:hover,
+  #services .cta-main-secondary:hover,
+  #get-started .cta-main-primary:hover,
+  #get-started .cta-main-secondary:hover {
+    transform: translateY(-10px) scale(1.08);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+  }
+
+  #services .cta-main-primary:active,
+  #services .cta-main-secondary:active,
+  #get-started .cta-main-primary:active,
+  #get-started .cta-main-secondary:active {
+    transform: translateY(-5px) scale(1.04);
+  }
+
+  #get-started .cta-main-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.9);
+  }
 }
 
 /* Hero CTA pop-in on load */
@@ -605,6 +619,13 @@ body {
     transform: none;
     box-shadow: none;
     filter: none;
+  }
+
+  /* Hero CTAs keep pop on tap (active state) */
+  #hero-section .cta-main-primary:active,
+  #hero-section .cta-main-secondary:active {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
   }
 
   .service-edge-button {
