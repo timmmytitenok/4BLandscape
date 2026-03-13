@@ -415,7 +415,7 @@ export default function Home() {
           </h1>
 
           {/* Subtitle */}
-          <p className="hero-load-item hero-load-2 relative mx-auto mb-20 max-w-xl text-base text-zinc-400 sm:mb-24 sm:text-lg md:max-w-none md:text-xl md:whitespace-nowrap">
+          <p className="hero-load-item hero-load-2 relative mx-auto mb-28 max-w-xl text-base text-zinc-400 sm:mb-24 sm:text-lg md:max-w-none md:text-xl md:whitespace-nowrap">
             <span className="sm:hidden">Keeping Columbus Ohio yards clean.</span>
             <span className="hidden sm:inline">Keeping Columbus Ohio yards clean, healthy, and looking their best.</span>
           </p>
