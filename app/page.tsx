@@ -124,7 +124,7 @@ export default function Home() {
     if (!serviceTitle.exiting) return;
     const t = setTimeout(
       () => setServiceTitle((s) => (s.exiting ? { ...s, exiting: null } : s)),
-      320
+      380
     );
     return () => clearTimeout(t);
   }, [serviceTitle.exiting ?? ""]);
@@ -451,7 +451,7 @@ export default function Home() {
         className="scroll-mt-20 border-t border-white/5 bg-[#0f0f0f] px-4 pt-15 pb-16 sm:px-6 sm:pt-28 sm:pb-20"
       >
         <div className="mx-auto max-w-6xl">
-          <h2 className="mb-3 text-center text-2xl font-bold sm:mb-8 sm:text-5xl">
+          <h2 className="mb-3 text-center text-3xl font-bold sm:mb-8 sm:text-5xl">
             <span className="block sm:hidden">Explore Our Services</span>
             <span className="hidden sm:inline">Explore Our Landscaping Services</span>
           </h2>
@@ -479,7 +479,7 @@ export default function Home() {
             textColor="#ffffff"
             borderRadius={0.05}
             scrollSpeed={isMobileViewport ? 2.5 : 2}
-            scrollEase={isMobileViewport ? 0.18 : 0.05}
+            scrollEase={isMobileViewport ? 0.12 : 0.05}
             onCurrentItemChange={isMobileViewport ? handleServiceItemChange : undefined}
           />
           <button
@@ -546,7 +546,7 @@ export default function Home() {
             type="button"
             aria-label="Scroll services left"
             onClick={goToPrevService}
-            className="inline-flex items-center justify-center rounded-lg border border-white/20 bg-[#111111] px-7 py-3.5 text-base font-semibold text-zinc-200"
+            className="inline-flex items-center justify-center rounded-lg border border-white/20 bg-[#111111] px-8 py-4 text-lg font-semibold text-zinc-200"
           >
             Prev
           </button>
@@ -554,7 +554,7 @@ export default function Home() {
             type="button"
             aria-label="Scroll services right"
             onClick={goToNextService}
-            className="inline-flex items-center justify-center rounded-lg border border-white/20 bg-[#111111] px-7 py-3.5 text-base font-semibold text-zinc-200"
+            className="inline-flex items-center justify-center rounded-lg border border-white/20 bg-[#111111] px-8 py-4 text-lg font-semibold text-zinc-200"
           >
             Next
           </button>
