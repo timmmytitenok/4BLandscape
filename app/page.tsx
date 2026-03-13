@@ -133,6 +133,7 @@ export default function Home() {
   const [serviceEdgeHover, setServiceEdgeHover] = useState<"left" | "right" | null>(null);
   const [serviceButtonHover, setServiceButtonHover] = useState<"left" | "right" | null>(null);
   const [serviceButtonOpacity, setServiceButtonOpacity] = useState({ left: 0, right: 0 });
+  const [heroReady, setHeroReady] = useState(false);
   const workSectionRef = useRef<HTMLElement | null>(null);
   const heroLoadRef = useRef<HTMLDivElement | null>(null);
   const serviceGalleryRef = useRef<{ nudgeLeft: () => void; nudgeRight: () => void } | null>(null);
@@ -165,13 +166,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const heroNode = heroLoadRef.current;
-    if (!heroNode) return;
-    heroNode.classList.remove("hero-ready");
-    const timer = window.setTimeout(() => {
-      heroNode.classList.add("hero-ready");
-    }, 120);
-
+    const timer = window.setTimeout(() => setHeroReady(true), 100);
     return () => window.clearTimeout(timer);
   }, []);
 
@@ -368,15 +363,13 @@ export default function Home() {
       {/* Hero Section - Full Screen */}
       <section
         id="hero-section"
-        className="relative flex min-h-[82vh] flex-col items-center justify-center overflow-hidden px-4 pt-24 sm:min-h-screen sm:px-6"
+        className={`relative flex min-h-[82vh] flex-col items-center justify-center overflow-hidden px-4 pt-24 sm:min-h-screen sm:px-6 ${heroReady ? "hero-ready" : ""}`}
       >
-        {/* Background image - slightly blurred */}
+        {/* Background image - animates in on load */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          className="hero-bg absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: "url(/hero-landscape.png)",
-            filter: "blur(2px)",
-            transform: "scale(1.02)",
           }}
         />
         {/* Darker overlay for text contrast */}

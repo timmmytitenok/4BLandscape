@@ -125,6 +125,31 @@ body {
   will-change: filter, opacity;
 }
 
+/* Hero background - animates in on load */
+#hero-section .hero-bg {
+  opacity: 0;
+  filter: blur(16px);
+  transform: scale(1.12);
+  will-change: opacity, filter, transform;
+}
+
+#hero-section.hero-ready .hero-bg {
+  animation: hero-bg-in 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes hero-bg-in {
+  0% {
+    opacity: 0;
+    filter: blur(16px);
+    transform: scale(1.12);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(2px);
+    transform: scale(1.02);
+  }
+}
+
 @keyframes hero-load-motion {
   0% {
     opacity: 0;
