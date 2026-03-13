@@ -299,7 +299,7 @@ class Media {
     if (viewport) this.viewport = viewport;
 
     this.scale = this.screen.height / 1500;
-    const mobileScale = this.screen.width < 640 ? 1.5 : 1;
+    const mobileScale = this.screen.width < 640 ? 1.68 : 1;
     this.imagePlane.scale.y = ((this.viewport.height * (900 * this.scale)) / this.screen.height) * mobileScale;
     this.imagePlane.scale.x = ((this.viewport.width * (700 * this.scale)) / this.screen.width) * mobileScale;
     this.imagePlane.program.uniforms.uPlaneSizes.value = [this.imagePlane.scale.x, this.imagePlane.scale.y];

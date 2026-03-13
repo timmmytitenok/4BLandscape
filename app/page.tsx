@@ -451,17 +451,20 @@ export default function Home() {
         className="scroll-mt-20 border-t border-white/5 bg-[#0f0f0f] px-4 pt-15 pb-16 sm:px-6 sm:pt-28 sm:pb-20"
       >
         <div className="mx-auto max-w-6xl">
-          <h2 className="mb-6 text-center text-2xl font-bold sm:mb-8 sm:text-5xl">
+          <h2 className="mb-3 text-center text-2xl font-bold sm:mb-8 sm:text-5xl">
             <span className="block sm:hidden">Explore Our Services</span>
             <span className="hidden sm:inline">Explore Our Landscaping Services</span>
           </h2>
+          <p className="mb-8 text-center text-xs font-light text-zinc-500 sm:hidden">
+            Find the right service for your yard.
+          </p>
           <p className="hidden text-center text-sm text-zinc-400 sm:block sm:text-base">
             Swipe to explore services -&gt;
           </p>
         </div>
 
         <div
-          className="service-gallery-reveal relative left-1/2 mt-2 h-[360px] w-screen -translate-x-1/2 overflow-visible sm:mt-5 sm:h-[620px] lg:h-[700px]"
+          className="service-gallery-reveal relative left-1/2 mt-12 h-[360px] w-screen -translate-x-1/2 overflow-visible sm:mt-5 sm:h-[620px] lg:h-[700px]"
           onMouseMove={isMobileViewport ? undefined : handleServiceHoverEdge}
           onMouseLeave={() => {
             setServiceEdgeHover(null);
@@ -520,7 +523,7 @@ export default function Home() {
         </div>
 
         <div
-          className="service-mobile-title relative mt-4 min-h-[2.75rem] text-center text-2xl font-bold leading-tight text-white sm:hidden"
+          className="service-mobile-title relative mt-9 min-h-[2.75rem] text-center text-2xl font-bold leading-tight text-white sm:hidden"
           aria-live="polite"
         >
           {serviceTitle.exiting && (
@@ -543,7 +546,7 @@ export default function Home() {
             type="button"
             aria-label="Scroll services left"
             onClick={goToPrevService}
-            className="inline-flex items-center justify-center rounded-lg border border-white/20 bg-[#111111] px-5 py-2.5 text-sm font-semibold text-zinc-200"
+            className="inline-flex items-center justify-center rounded-lg border border-white/20 bg-[#111111] px-7 py-3.5 text-base font-semibold text-zinc-200"
           >
             Prev
           </button>
@@ -551,7 +554,7 @@ export default function Home() {
             type="button"
             aria-label="Scroll services right"
             onClick={goToNextService}
-            className="inline-flex items-center justify-center rounded-lg border border-white/20 bg-[#111111] px-5 py-2.5 text-sm font-semibold text-zinc-200"
+            className="inline-flex items-center justify-center rounded-lg border border-white/20 bg-[#111111] px-7 py-3.5 text-base font-semibold text-zinc-200"
           >
             Next
           </button>
