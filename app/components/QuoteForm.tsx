@@ -116,11 +116,35 @@ export default function QuoteForm({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // In production, send formData to your backend/API
-    console.log("Quote request:", formData);
+    try {
+      const payload = {
+        services: formData.services,
+        projectDescription: formData.projectDescription,
+        timeline: formData.timeline,
+        streetAddress: formData.streetAddress,
+        city: formData.city,
+        zipCode: formData.zipCode,
+        propertyType: formData.propertyType,
+        fullName: formData.fullName,
+        phone: formData.phone,
+        email: formData.email,
+        files: formData.files.map((f) => ({ name: f.name })),
+      };
+      const res = await fetch("/api/quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error("Failed to send");
+    } catch (err) {
+      console.error("Quote submit error:", err);
+      setIsSubmitting(false);
+      alert("Something went wrong. Please try calling us at (614) 893-2918.");
+      return;
+    }
   };
 
   useEffect(() => {
@@ -159,7 +183,7 @@ export default function QuoteForm({
             style={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
           />
         </div>
-        <div className="relative flex items-center justify-end px-4 py-4 sm:px-6">
+        <div className="relative flex items-center justify-end px-3 py-3 sm:px-6 sm:py-4">
           <span className="absolute left-1/2 -translate-x-1/2 text-sm font-medium text-zinc-500">
             Step {step} of {TOTAL_STEPS}
           </span>
@@ -178,17 +202,17 @@ export default function QuoteForm({
 
       {/* Form content - centered, shifted up slightly */}
       <div className="flex min-h-0 flex-1 overflow-y-auto">
-        <div className="flex min-h-full flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6 sm:py-16 -translate-y-10 sm:-translate-y-8">
+        <div className="flex min-h-full flex-1 flex-col items-center justify-center px-3 py-4 sm:px-6 sm:py-16 sm:-translate-y-8">
           {isSubmitting ? (
-            <div className="flex flex-col items-center justify-center gap-6">
-              <div className="h-14 w-14 animate-spin rounded-full border-2 border-white/20 border-t-[#39ff14]" />
-              <p className="text-lg font-medium text-zinc-400">Sending your request...</p>
+            <div className="flex flex-col items-center justify-center gap-4 sm:gap-6">
+              <div className="h-12 w-12 animate-spin rounded-full border-2 border-white/20 border-t-[#39ff14] sm:h-14 sm:w-14" />
+              <p className="text-sm font-medium text-zinc-400 sm:text-lg">Sending your request...</p>
             </div>
           ) : showCheckmark ? (
-            <div className="flex flex-col items-center justify-center gap-6">
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#39ff14]/20">
+            <div className="flex flex-col items-center justify-center gap-4 sm:gap-6">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#39ff14]/20 sm:h-20 sm:w-20">
                 <svg
-                  className="h-10 w-10 text-[#39ff14] animate-checkmark-pop"
+                  className="h-8 w-8 text-[#39ff14] animate-checkmark-pop sm:h-10 sm:w-10"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth={2.5}
@@ -201,7 +225,7 @@ export default function QuoteForm({
           ) : submitted ? (
             <SuccessScreen onClose={resetForm} />
           ) : (
-            <form onSubmit={handleSubmit} className="w-full max-w-xl space-y-8">
+            <form onSubmit={handleSubmit} className="w-full max-w-xl space-y-4 sm:space-y-8">
               <StepContent
                 step={step}
                 direction={direction}
@@ -298,14 +322,14 @@ function Step1({
 
   return (
     <>
-      <h2 className="mb-8 text-2xl font-bold text-white sm:text-3xl">What service do you need?</h2>
-      <div className="mx-auto mb-10 grid max-w-2xl grid-cols-2 gap-3 sm:grid-cols-3">
+      <h2 className="mb-4 text-xl font-bold text-white sm:mb-8 sm:text-3xl">What service do you need?</h2>
+      <div className="mx-auto mb-6 grid max-w-2xl grid-cols-2 gap-2 sm:mb-10 sm:grid-cols-3 sm:gap-3">
         {SERVICE_OPTIONS.filter((s) => s !== "Other").map((service) => (
           <button
             key={service}
             type="button"
             onClick={() => toggleService(service)}
-            className={`rounded border px-4 py-3.5 text-center text-sm font-medium transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${
+            className={`rounded border px-3 py-2.5 text-center text-xs font-medium transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] sm:px-4 sm:py-3.5 sm:text-sm ${
               service === "Gravel Delivers" ? "sm:hidden" : ""
             } ${
               formData.services.includes(service)
@@ -319,7 +343,7 @@ function Step1({
         <button
           type="button"
           onClick={() => toggleService("Other")}
-          className={`col-span-2 rounded border px-4 py-3.5 text-center text-sm font-medium transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] sm:col-span-3 ${
+          className={`col-span-2 rounded border px-3 py-2.5 text-center text-xs font-medium transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] sm:col-span-3 sm:px-4 sm:py-3.5 sm:text-sm ${
             formData.services.includes("Other")
               ? "border-[#39ff14] bg-[#39ff14] text-black"
               : "border-white/25 bg-transparent text-zinc-300 hover:border-white/40"
@@ -332,7 +356,7 @@ function Step1({
         type="button"
         onClick={onNext}
         disabled={!hasSelection}
-        className="mx-auto mt-4 block w-full max-w-xs rounded border-0 bg-[#39ff14] px-6 py-3.5 font-semibold text-black transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-40 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98] disabled:hover:scale-100 disabled:hover:brightness-100"
+        className="mx-auto mt-2 block w-full max-w-xs rounded border-0 bg-[#39ff14] px-6 py-2.5 font-semibold text-black transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-40 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98] disabled:hover:scale-100 disabled:hover:brightness-100 sm:mt-4 sm:py-3.5"
       >
         Continue
       </button>
@@ -353,19 +377,19 @@ function Step2({
 }) {
   return (
     <>
-      <h2 className="mb-8 text-2xl font-bold text-white sm:text-3xl">Tell us about the project</h2>
+      <h2 className="mb-4 text-xl font-bold text-white sm:mb-8 sm:text-3xl">Tell us about the project</h2>
       <textarea
         value={formData.projectDescription}
         onChange={(e) => updateForm("projectDescription", e.target.value)}
         placeholder="e.g. Need mulch installed in front beds, lawn mowing weekly..."
-        rows={5}
-        className="mx-auto mb-10 block w-full max-w-md resize-none rounded border border-white/25 bg-transparent px-4 py-3 text-base text-white placeholder-zinc-600 transition-all duration-200 ease-out hover:border-white/40 focus:border-[#39ff14] focus:outline-none focus:ring-2 focus:ring-[#39ff14]/20 sm:text-sm"
+        rows={4}
+        className="mx-auto mb-6 block w-full max-w-md resize-none rounded border border-white/25 bg-transparent px-4 py-2.5 text-base text-white placeholder-zinc-600 transition-all duration-200 ease-out hover:border-white/40 focus:border-[#39ff14] focus:outline-none focus:ring-2 focus:ring-[#39ff14]/20 sm:mb-10 sm:rows-5 sm:py-3 sm:text-sm"
       />
-      <div className="mx-auto flex max-w-md justify-center gap-3">
+      <div className="mx-auto flex max-w-md justify-center gap-2 sm:gap-3">
         <button
           type="button"
           onClick={onPrev}
-          className="rounded border border-white/25 bg-transparent px-6 py-3.5 font-semibold text-white transition-all duration-200 ease-out hover:scale-[1.02] hover:border-white/40 hover:bg-white/5 active:scale-[0.98]"
+          className="rounded border border-white/25 bg-transparent px-4 py-2.5 font-semibold text-white transition-all duration-200 ease-out hover:scale-[1.02] hover:border-white/40 hover:bg-white/5 active:scale-[0.98] sm:px-6 sm:py-3.5"
         >
           Back
         </button>
@@ -373,7 +397,7 @@ function Step2({
           type="button"
           onClick={onNext}
           disabled={!formData.projectDescription.trim()}
-          className="flex-1 rounded border-0 bg-[#39ff14] px-6 py-3.5 font-semibold text-black transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-40 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98] disabled:hover:scale-100 disabled:hover:brightness-100"
+          className="flex-1 rounded border-0 bg-[#39ff14] px-4 py-2.5 font-semibold text-black transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-40 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98] disabled:hover:scale-100 disabled:hover:brightness-100 sm:px-6 sm:py-3.5"
         >
           Continue
         </button>
@@ -399,9 +423,9 @@ function Step3({
 }) {
   return (
     <>
-      <h2 className="mb-3 text-2xl font-bold text-white sm:text-3xl">Add photos or videos</h2>
-      <p className="mb-8 text-sm text-zinc-500">Attaching images or videos is optional but very helpful</p>
-      <label className="mx-auto mb-8 flex max-w-md cursor-pointer flex-col items-center justify-center rounded border-2 border-dashed border-white/25 bg-transparent py-12 transition-all duration-200 ease-out hover:scale-[1.01] hover:border-[#39ff14]/40 hover:bg-[#39ff14]/5 active:scale-[0.99]">
+      <h2 className="mb-2 text-xl font-bold text-white sm:mb-3 sm:text-3xl">Add photos or videos</h2>
+      <p className="mb-4 text-xs text-zinc-500 sm:mb-8 sm:text-sm">Attaching images or videos is optional but very helpful</p>
+      <label className="mx-auto mb-6 flex max-w-md cursor-pointer flex-col items-center justify-center rounded border-2 border-dashed border-white/25 bg-transparent py-8 transition-all duration-200 ease-out hover:scale-[1.01] hover:border-[#39ff14]/40 hover:bg-[#39ff14]/5 active:scale-[0.99] sm:mb-8 sm:py-12">
         <input
           type="file"
           accept="image/*,video/*"
@@ -410,7 +434,7 @@ function Step3({
           className="hidden"
         />
         <svg
-          className="mb-3 h-12 w-12 text-zinc-500"
+          className="mb-2 h-10 w-10 text-zinc-500 sm:mb-3 sm:h-12 sm:w-12"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -422,10 +446,10 @@ function Step3({
             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"
           />
         </svg>
-        <span className="text-sm font-medium text-zinc-400">Click to upload images or videos</span>
+        <span className="text-xs font-medium text-zinc-400 sm:text-sm">Click to upload images or videos</span>
       </label>
       {formData.files.length > 0 && (
-        <div className="mx-auto mb-8 flex max-w-md flex-wrap justify-center gap-2">
+        <div className="mx-auto mb-6 flex max-w-md flex-wrap justify-center gap-2 sm:mb-8">
           {formData.files.map((file, i) => (
           <div
             key={i}
@@ -439,18 +463,18 @@ function Step3({
           ))}
         </div>
       )}
-      <div className="mx-auto flex max-w-md justify-center gap-3">
+      <div className="mx-auto flex max-w-md justify-center gap-2 sm:gap-3">
         <button
           type="button"
           onClick={onPrev}
-          className="rounded border border-white/25 bg-transparent px-6 py-3.5 font-semibold text-white transition-all duration-200 ease-out hover:scale-[1.02] hover:border-white/40 hover:bg-white/5 active:scale-[0.98]"
+          className="rounded border border-white/25 bg-transparent px-4 py-2.5 font-semibold text-white transition-all duration-200 ease-out hover:scale-[1.02] hover:border-white/40 hover:bg-white/5 active:scale-[0.98] sm:px-6 sm:py-3.5"
         >
           Back
         </button>
         <button
           type="button"
           onClick={onNext}
-          className="flex-1 rounded border-0 bg-[#39ff14] px-6 py-3.5 font-semibold text-black transition-all duration-200 ease-out hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]"
+          className="flex-1 rounded border-0 bg-[#39ff14] px-4 py-2.5 font-semibold text-black transition-all duration-200 ease-out hover:scale-[1.02] hover:brightness-110 active:scale-[0.98] sm:px-6 sm:py-3.5"
         >
           Continue
         </button>
@@ -472,14 +496,14 @@ function Step4({
 }) {
   return (
     <>
-      <h2 className="mb-8 text-xl font-bold text-white sm:text-2xl">When would you like the work done?</h2>
-      <div className="mx-auto mb-10 max-w-md space-y-2">
+      <h2 className="mb-4 text-xl font-bold text-white sm:mb-8 sm:text-2xl">When would you like the work done?</h2>
+      <div className="mx-auto mb-6 max-w-md space-y-1.5 sm:mb-10 sm:space-y-2">
         {TIMELINE_OPTIONS.map((opt) => (
           <button
             key={opt}
             type="button"
             onClick={() => updateForm("timeline", opt)}
-            className={`block w-full rounded border px-4 py-3.5 text-center text-sm font-medium transition-all duration-200 ease-out hover:scale-[1.01] active:scale-[0.99] ${
+            className={`block w-full rounded border px-4 py-2.5 text-center text-xs font-medium transition-all duration-200 ease-out hover:scale-[1.01] active:scale-[0.99] sm:py-3.5 sm:text-sm ${
               formData.timeline === opt
                 ? "border-[#39ff14] bg-[#39ff14] text-black"
                 : "border-white/25 bg-transparent text-zinc-300 hover:border-white/40"
@@ -489,11 +513,11 @@ function Step4({
           </button>
         ))}
       </div>
-      <div className="mx-auto flex max-w-md justify-center gap-3">
+      <div className="mx-auto flex max-w-md justify-center gap-2 sm:gap-3">
         <button
           type="button"
           onClick={onPrev}
-          className="rounded border border-white/25 bg-transparent px-6 py-3.5 font-semibold text-white transition-all duration-200 ease-out hover:scale-[1.02] hover:border-white/40 hover:bg-white/5 active:scale-[0.98]"
+          className="rounded border border-white/25 bg-transparent px-4 py-2.5 font-semibold text-white transition-all duration-200 ease-out hover:scale-[1.02] hover:border-white/40 hover:bg-white/5 active:scale-[0.98] sm:px-6 sm:py-3.5"
         >
           Back
         </button>
@@ -501,7 +525,7 @@ function Step4({
           type="button"
           onClick={onNext}
           disabled={!formData.timeline}
-          className="flex-1 rounded border-0 bg-[#39ff14] px-6 py-3.5 font-semibold text-black transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-40 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98] disabled:hover:scale-100 disabled:hover:brightness-100"
+          className="flex-1 rounded border-0 bg-[#39ff14] px-4 py-2.5 font-semibold text-black transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-40 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98] disabled:hover:scale-100 disabled:hover:brightness-100 sm:px-6 sm:py-3.5"
         >
           Continue
         </button>
@@ -529,47 +553,47 @@ function Step5({
 
   return (
     <>
-      <h2 className="mb-8 text-2xl font-bold text-white sm:text-3xl">Where is the property located?</h2>
-      <div className="mx-auto mb-10 max-w-md space-y-4 text-left">
+      <h2 className="mb-4 text-xl font-bold text-white sm:mb-8 sm:text-3xl">Where is the property located?</h2>
+      <div className="mx-auto mb-6 max-w-md space-y-3 text-left sm:mb-10 sm:space-y-4">
         <div>
-          <label className="mb-2 block text-left text-sm font-medium text-zinc-500">Street Address</label>
+          <label className="mb-1.5 block text-left text-xs font-medium text-zinc-500 sm:mb-2 sm:text-sm">Street Address</label>
           <input
             type="text"
             value={formData.streetAddress}
             onChange={(e) => updateForm("streetAddress", e.target.value)}
             placeholder="123 Main St"
-            className="w-full rounded border border-white/25 bg-transparent px-4 py-3 text-base text-white placeholder-zinc-600 transition-all duration-200 ease-out hover:border-white/40 focus:border-[#39ff14] focus:outline-none focus:ring-2 focus:ring-[#39ff14]/20 sm:text-sm"
+            className="w-full rounded border border-white/25 bg-transparent px-3 py-2.5 text-base text-white placeholder-zinc-600 transition-all duration-200 ease-out hover:border-white/40 focus:border-[#39ff14] focus:outline-none focus:ring-2 focus:ring-[#39ff14]/20 sm:px-4 sm:py-3 sm:text-sm"
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <div>
-            <label className="mb-2 block text-left text-sm font-medium text-zinc-500">City</label>
+            <label className="mb-1.5 block text-left text-xs font-medium text-zinc-500 sm:mb-2 sm:text-sm">City</label>
             <input
               type="text"
               value={formData.city}
               onChange={(e) => updateForm("city", e.target.value)}
               placeholder="Columbus"
-              className="w-full rounded border border-white/25 bg-transparent px-4 py-3 text-base text-white placeholder-zinc-600 transition-all duration-200 ease-out hover:border-white/40 focus:border-[#39ff14] focus:outline-none focus:ring-2 focus:ring-[#39ff14]/20 sm:text-sm"
+              className="w-full rounded border border-white/25 bg-transparent px-3 py-2.5 text-base text-white placeholder-zinc-600 transition-all duration-200 ease-out hover:border-white/40 focus:border-[#39ff14] focus:outline-none focus:ring-2 focus:ring-[#39ff14]/20 sm:px-4 sm:py-3 sm:text-sm"
             />
           </div>
           <div>
-            <label className="mb-2 block text-left text-sm font-medium text-zinc-500">ZIP Code</label>
+            <label className="mb-1.5 block text-left text-xs font-medium text-zinc-500 sm:mb-2 sm:text-sm">ZIP Code</label>
             <input
               type="text"
               value={formData.zipCode}
               onChange={(e) => updateForm("zipCode", e.target.value)}
               placeholder="43215"
-              className="w-full rounded border border-white/25 bg-transparent px-4 py-3 text-base text-white placeholder-zinc-600 transition-all duration-200 ease-out hover:border-white/40 focus:border-[#39ff14] focus:outline-none focus:ring-2 focus:ring-[#39ff14]/20 sm:text-sm"
+              className="w-full rounded border border-white/25 bg-transparent px-3 py-2.5 text-base text-white placeholder-zinc-600 transition-all duration-200 ease-out hover:border-white/40 focus:border-[#39ff14] focus:outline-none focus:ring-2 focus:ring-[#39ff14]/20 sm:px-4 sm:py-3 sm:text-sm"
             />
           </div>
         </div>
-        <div className="mt-8 border-t border-white/15 pt-8">
-          <label className="mb-2 block text-left text-sm font-medium text-zinc-500">Residential or commercial?</label>
-          <div className="flex gap-4">
+        <div className="mt-4 border-t border-white/15 pt-4 sm:mt-8 sm:pt-8">
+          <label className="mb-1.5 block text-left text-xs font-medium text-zinc-500 sm:mb-2 sm:text-sm">Residential or commercial?</label>
+          <div className="flex gap-2 sm:gap-4">
             <button
               type="button"
               onClick={() => updateForm("propertyType", "residential")}
-              className={`flex-1 rounded border px-4 py-3.5 text-center font-medium transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${
+              className={`flex-1 rounded border px-3 py-2.5 text-center text-sm font-medium transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] sm:px-4 sm:py-3.5 ${
                 formData.propertyType === "residential"
                   ? "border-[#39ff14] bg-[#39ff14] text-black"
                   : "border-white/25 bg-transparent text-zinc-300 hover:border-white/40"
@@ -580,7 +604,7 @@ function Step5({
             <button
               type="button"
               onClick={() => updateForm("propertyType", "commercial")}
-              className={`flex-1 rounded border px-4 py-3.5 text-center font-medium transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${
+              className={`flex-1 rounded border px-3 py-2.5 text-center text-sm font-medium transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] sm:px-4 sm:py-3.5 ${
                 formData.propertyType === "commercial"
                   ? "border-[#39ff14] bg-[#39ff14] text-black"
                   : "border-white/25 bg-transparent text-zinc-300 hover:border-white/40"
@@ -603,7 +627,7 @@ function Step5({
           type="button"
           onClick={onNext}
           disabled={!canContinue}
-          className="flex-1 rounded border-0 bg-[#39ff14] px-6 py-3.5 font-semibold text-black transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-40 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98] disabled:hover:scale-100 disabled:hover:brightness-100"
+          className="flex-1 rounded border-0 bg-[#39ff14] px-4 py-2.5 font-semibold text-black transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-40 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98] disabled:hover:scale-100 disabled:hover:brightness-100 sm:px-6 sm:py-3.5"
         >
           Continue
         </button>
@@ -625,21 +649,21 @@ function Step7({
 }) {
   return (
     <>
-      <h2 className="mb-8 text-2xl font-bold text-white sm:text-3xl">How can we reach you?</h2>
-      <div className="mx-auto mb-10 max-w-md space-y-4 text-left">
+      <h2 className="mb-4 text-xl font-bold text-white sm:mb-8 sm:text-3xl">How can we reach you?</h2>
+      <div className="mx-auto mb-6 max-w-md space-y-3 text-left sm:mb-10 sm:space-y-4">
         <div>
-          <label className="mb-2 block text-left text-sm font-medium text-zinc-500">Full Name</label>
+          <label className="mb-1.5 block text-left text-xs font-medium text-zinc-500 sm:mb-2 sm:text-sm">Full Name</label>
           <input
             type="text"
             value={formData.fullName}
             onChange={(e) => updateForm("fullName", e.target.value)}
             placeholder="John Smith"
             required
-            className="w-full rounded border border-white/25 bg-transparent px-4 py-3 text-base text-white placeholder-zinc-600 transition-all duration-200 ease-out hover:border-white/40 focus:border-[#39ff14] focus:outline-none focus:ring-2 focus:ring-[#39ff14]/20 sm:text-sm"
+            className="w-full rounded border border-white/25 bg-transparent px-3 py-2.5 text-base text-white placeholder-zinc-600 transition-all duration-200 ease-out hover:border-white/40 focus:border-[#39ff14] focus:outline-none focus:ring-2 focus:ring-[#39ff14]/20 sm:px-4 sm:py-3 sm:text-sm"
           />
         </div>
         <div>
-          <label className="mb-2 block text-left text-sm font-medium text-zinc-500">Phone Number</label>
+          <label className="mb-1.5 block text-left text-xs font-medium text-zinc-500 sm:mb-2 sm:text-sm">Phone Number</label>
           <input
             type="tel"
             value={formData.phone}
@@ -647,26 +671,26 @@ function Step7({
             placeholder="(614) 555-1234"
             maxLength={14}
             required
-            className="w-full rounded border border-white/25 bg-transparent px-4 py-3 text-base text-white placeholder-zinc-600 transition-all duration-200 ease-out hover:border-white/40 focus:border-[#39ff14] focus:outline-none focus:ring-2 focus:ring-[#39ff14]/20 sm:text-sm"
+            className="w-full rounded border border-white/25 bg-transparent px-3 py-2.5 text-base text-white placeholder-zinc-600 transition-all duration-200 ease-out hover:border-white/40 focus:border-[#39ff14] focus:outline-none focus:ring-2 focus:ring-[#39ff14]/20 sm:px-4 sm:py-3 sm:text-sm"
           />
         </div>
         <div>
-          <label className="mb-2 block text-left text-sm font-medium text-zinc-500">Email Address</label>
+          <label className="mb-1.5 block text-left text-xs font-medium text-zinc-500 sm:mb-2 sm:text-sm">Email Address</label>
           <input
             type="email"
             value={formData.email}
             onChange={(e) => updateForm("email", e.target.value)}
             placeholder="john@example.com"
             required
-            className="w-full rounded border border-white/25 bg-transparent px-4 py-3 text-base text-white placeholder-zinc-600 transition-all duration-200 ease-out hover:border-white/40 focus:border-[#39ff14] focus:outline-none focus:ring-2 focus:ring-[#39ff14]/20 sm:text-sm"
+            className="w-full rounded border border-white/25 bg-transparent px-3 py-2.5 text-base text-white placeholder-zinc-600 transition-all duration-200 ease-out hover:border-white/40 focus:border-[#39ff14] focus:outline-none focus:ring-2 focus:ring-[#39ff14]/20 sm:px-4 sm:py-3 sm:text-sm"
           />
         </div>
       </div>
-      <div className="mx-auto flex max-w-md justify-center gap-3">
+      <div className="mx-auto flex max-w-md justify-center gap-2 sm:gap-3">
         <button
           type="button"
           onClick={onPrev}
-          className="rounded border border-white/25 bg-transparent px-6 py-3.5 font-semibold text-white transition-all duration-200 ease-out hover:scale-[1.02] hover:border-white/40 hover:bg-white/5 active:scale-[0.98]"
+          className="rounded border border-white/25 bg-transparent px-4 py-2.5 font-semibold text-white transition-all duration-200 ease-out hover:scale-[1.02] hover:border-white/40 hover:bg-white/5 active:scale-[0.98] sm:px-6 sm:py-3.5"
         >
           Back
         </button>
@@ -674,7 +698,7 @@ function Step7({
           type="submit"
           onClick={onSubmit}
           disabled={!formData.fullName || formData.phone.replace(/\D/g, "").length !== 10 || !formData.email}
-          className="flex-1 rounded border-0 bg-[#39ff14] px-6 py-3.5 font-semibold text-black transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-40 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98] disabled:hover:scale-100 disabled:hover:brightness-100"
+          className="flex-1 rounded border-0 bg-[#39ff14] px-4 py-2.5 font-semibold text-black transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-40 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98] disabled:hover:scale-100 disabled:hover:brightness-100 sm:px-6 sm:py-3.5"
         >
           Submit Request
         </button>
@@ -698,27 +722,27 @@ function SuccessScreen({ onClose }: { onClose: () => void }) {
   const secs = timeLeft % 60;
 
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <h2 className="mb-2 text-2xl font-bold text-white sm:text-3xl">Request Received.</h2>
-      <p className="mb-10 text-base font-normal text-zinc-400">
+    <div className="flex flex-col items-center justify-center py-8 text-center sm:py-16">
+      <h2 className="mb-2 text-xl font-bold text-white sm:text-3xl">Request Received.</h2>
+      <p className="mb-6 text-sm font-normal text-zinc-400 sm:mb-10 sm:text-base">
         We&apos;ll reply within 24 hours.
       </p>
-      <div className="mb-10">
-        <span className="block text-5xl font-bold tabular-nums text-[#39ff14] sm:text-6xl">
+      <div className="mb-6 sm:mb-10">
+        <span className="block text-4xl font-bold tabular-nums text-[#39ff14] sm:text-6xl">
           {String(hours).padStart(2, "0")}:{String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
         </span>
       </div>
-      <div className="mb-10 flex flex-col gap-3">
+      <div className="mb-6 flex flex-col gap-2 sm:mb-10 sm:gap-3">
         <a
           href={PHONE}
-          className="rounded border-0 bg-[#39ff14] px-8 py-3.5 font-semibold text-black transition-all duration-200 ease-out hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]"
+          className="rounded border-0 bg-[#39ff14] px-6 py-2.5 font-semibold text-black transition-all duration-200 ease-out hover:scale-[1.02] hover:brightness-110 active:scale-[0.98] sm:px-8 sm:py-3.5"
         >
           Call Now
         </a>
         <button
           type="button"
           onClick={onClose}
-          className="rounded border border-white/25 bg-transparent px-8 py-3.5 font-semibold text-white transition-all duration-200 ease-out hover:scale-[1.02] hover:border-white/40 hover:bg-white/5 active:scale-[0.98]"
+          className="rounded border border-white/25 bg-transparent px-6 py-2.5 font-semibold text-white transition-all duration-200 ease-out hover:scale-[1.02] hover:border-white/40 hover:bg-white/5 active:scale-[0.98] sm:px-8 sm:py-3.5"
         >
           Back to Site
         </button>

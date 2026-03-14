@@ -838,7 +838,7 @@ export default function Home() {
             Reliable landscaping, clean results, and a local team you can count on.
           </p>
 
-          <div className="grid items-stretch gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
+          <div className="grid min-w-0 items-stretch gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
             <div
               className={`work-reveal h-full rounded-2xl border border-white/10 bg-[#171717] p-5 shadow-xl shadow-black/25 sm:p-8 ${
                 workVisible ? "is-visible" : ""
@@ -879,19 +879,19 @@ export default function Home() {
             </div>
 
             <div
-              className={`work-reveal mx-auto flex h-full w-full justify-center rounded-[20px] border border-white/10 bg-[#141414] p-2 shadow-2xl shadow-black/40 ${
+              className={`work-reveal mx-auto flex h-full w-full min-w-0 max-w-full justify-center rounded-[20px] border border-white/10 bg-[#141414] p-2 shadow-2xl shadow-black/40 ${
                 workVisible ? "is-visible" : ""
               }`}
               style={{ transitionDelay: "0.16s" }}
             >
-              <div className="h-full overflow-hidden rounded-2xl">
+              <div className="relative w-full min-w-full min-h-[320px] overflow-hidden rounded-2xl sm:min-w-0 sm:min-h-0 sm:h-full" style={{ aspectRatio: "4/5" }}>
                 <video
                   autoPlay
                   muted
                   loop
                   playsInline
                   poster="/work/after-2.png"
-                  className="aspect-[4/5] h-full w-auto max-w-full object-cover"
+                  className="absolute inset-0 h-full w-full object-cover"
                 >
                   <source src="/landscaping-work.mp4" type="video/mp4" />
                 </video>
