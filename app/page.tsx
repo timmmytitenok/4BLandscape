@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import CircularGallery from "./components/CircularGallery";
 import LightRays from "./components/LightRays";
+import QuoteForm from "./components/QuoteForm";
 const CircularGalleryAny = CircularGallery as any;
 
 const SERVICE_CATEGORIES = [
@@ -134,6 +135,7 @@ export default function Home() {
   const [serviceButtonHover, setServiceButtonHover] = useState<"left" | "right" | null>(null);
   const [serviceButtonOpacity, setServiceButtonOpacity] = useState({ left: 0, right: 0 });
   const [heroReady, setHeroReady] = useState(false);
+  const [quoteFormOpen, setQuoteFormOpen] = useState(false);
   const workSectionRef = useRef<HTMLElement | null>(null);
   const heroLoadRef = useRef<HTMLDivElement | null>(null);
   const serviceGalleryRef = useRef<{ nudgeLeft: () => void; nudgeRight: () => void } | null>(null);
@@ -169,6 +171,13 @@ export default function Home() {
     const timer = window.setTimeout(() => setHeroReady(true), 100);
     return () => window.clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = quoteFormOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [quoteFormOpen]);
 
   const handleServiceHoverEdge = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -305,6 +314,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#0a0a0a] text-white">
+      <QuoteForm isOpen={quoteFormOpen} onClose={() => setQuoteFormOpen(false)} />
       {/* Fixed Nav */}
       <nav
         className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/30 backdrop-blur-xl hover:border-white/20 will-change-transform transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] ${
@@ -342,13 +352,13 @@ export default function Home() {
 
           {/* Desktop CTA buttons - right */}
           <div className="hidden items-center justify-end gap-2 md:flex">
-            <a
-              href="/#contact"
-              onClick={(e) => smoothScrollTo(e, "contact")}
+            <button
+              type="button"
+              onClick={() => setQuoteFormOpen(true)}
               className="nav-cta-soft rounded-xl border border-white/20 px-4 py-2.5 text-xs font-semibold whitespace-nowrap text-white transition-all duration-300 hover:scale-105 hover:border-white/35 hover:bg-white/5 active:scale-[0.98] sm:px-5 sm:text-sm"
             >
               Request Quote
-            </a>
+            </button>
             <a
               href={PHONE}
               className="nav-cta rounded-xl bg-[#39ff14] px-4 py-2.5 text-xs font-semibold whitespace-nowrap text-black shadow-lg shadow-[#39ff14]/20 transition-all duration-300 hover:scale-105 hover:bg-[#5fff3d] hover:shadow-[#39ff14]/40 active:scale-[0.98] sm:px-5 sm:text-sm"
@@ -429,13 +439,13 @@ export default function Home() {
               <PhoneIcon className="h-5 w-5 sm:h-6 sm:w-6" />
               Call Now
             </a>
-            <a
-              href="/#contact"
-              onClick={(e) => smoothScrollTo(e, "contact")}
+            <button
+              type="button"
+              onClick={() => setQuoteFormOpen(true)}
               className="cta-main-secondary inline-flex w-full items-center justify-center rounded-xl border-2 border-white px-7 py-3.5 text-base font-semibold text-white sm:w-auto sm:min-w-[210px] sm:px-9 sm:py-4 sm:text-lg"
             >
               Request Free Quote
-            </a>
+            </button>
           </div>
 
           {/* Service area - smaller, subtle */}
@@ -569,13 +579,13 @@ export default function Home() {
               <PhoneIcon className="h-5 w-5" />
               CALL NOW
             </a>
-            <a
-              href="/#contact"
-              onClick={(e) => smoothScrollTo(e, "contact")}
+            <button
+              type="button"
+              onClick={() => setQuoteFormOpen(true)}
               className="cta-main-secondary inline-flex w-full items-center justify-center rounded-xl border-2 border-white px-6 py-3 text-base font-semibold text-white sm:w-auto sm:min-w-[210px] sm:px-9 sm:py-4 sm:text-lg"
             >
               REQUEST QUOTE
-            </a>
+            </button>
           </div>
           <p className="mt-5 text-center text-xs whitespace-nowrap text-zinc-400 sm:text-sm">
             Not sure what you need? Give us a call and we’ll help.
@@ -791,13 +801,13 @@ export default function Home() {
 
             <div className="mt-14 flex flex-col items-center text-center">
               <p className="mb-4 text-sm text-zinc-400">Like what you see?</p>
-              <a
-                href="/#contact"
-                onClick={(e) => smoothScrollTo(e, "contact")}
+              <button
+                type="button"
+                onClick={() => setQuoteFormOpen(true)}
                 className="inline-flex items-center justify-center rounded-lg border border-white/25 px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.02] hover:border-[#39ff14]/60 hover:text-[#39ff14]"
               >
                 Get a Free Quote
-              </a>
+              </button>
             </div>
           </div>
         </div>
@@ -987,13 +997,13 @@ export default function Home() {
                 <PhoneIcon className="h-5 w-5" />
                 Call Now
               </a>
-              <a
-                href="/#contact"
-                onClick={(e) => smoothScrollTo(e, "contact")}
+              <button
+                type="button"
+                onClick={() => setQuoteFormOpen(true)}
                 className="cta-main-secondary inline-flex w-full items-center justify-center rounded-xl border-2 border-white px-8 py-4 text-base font-semibold text-white sm:w-auto sm:min-w-[190px]"
               >
                 Request Free Quote
-              </a>
+              </button>
             </div>
 
             <p
