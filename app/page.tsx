@@ -1048,7 +1048,7 @@ export default function Home() {
             rel="noreferrer"
             className="mt-2 text-[11px] text-zinc-600 transition-all duration-300 hover:text-zinc-400"
           >
-            Website designed by <span className="text-zinc-400 hover:text-[#39ff14]">Stratova</span>
+            Website designed by <span className="normal-case text-zinc-400 hover:text-[#39ff14]">Stratova</span>
           </a>
         </div>
       </footer>
