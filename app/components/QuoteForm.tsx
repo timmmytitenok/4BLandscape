@@ -26,6 +26,12 @@ const TIMELINE_OPTIONS = [
 const TOTAL_STEPS = 6;
 const PHONE = "tel:6148932918";
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function isValidEmail(email: string): boolean {
+  return EMAIL_REGEX.test(email.trim());
+}
+
 function formatPhoneInput(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 10);
   if (digits.length === 0) return "";
@@ -118,6 +124,9 @@ export default function QuoteForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isValidEmail(formData.email)) {
+      return;
+    }
     setIsSubmitting(true);
     try {
       const payload = {
@@ -168,6 +177,9 @@ export default function QuoteForm({
   }, [showCheckmark]);
 
   const resetForm = () => {
+    if (typeof sessionStorage !== "undefined") {
+      sessionStorage.setItem("scrollToTop", "1");
+    }
     window.location.reload();
   };
 
@@ -697,7 +709,7 @@ function Step7({
         <button
           type="submit"
           onClick={onSubmit}
-          disabled={!formData.fullName || formData.phone.replace(/\D/g, "").length !== 10 || !formData.email}
+          disabled={!formData.fullName || formData.phone.replace(/\D/g, "").length !== 10 || !formData.email || !isValidEmail(formData.email)}
           className="flex-1 rounded border-0 bg-[#39ff14] px-4 py-2.5 font-semibold text-black transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-40 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98] disabled:hover:scale-100 disabled:hover:brightness-100 sm:px-6 sm:py-3.5"
         >
           Submit Request

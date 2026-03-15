@@ -179,6 +179,13 @@ export default function Home() {
     };
   }, [quoteFormOpen]);
 
+  useEffect(() => {
+    if (typeof sessionStorage !== "undefined" && sessionStorage.getItem("scrollToTop") === "1") {
+      sessionStorage.removeItem("scrollToTop");
+      window.scrollTo(0, 0);
+    }
+  }, []);
+
   const handleServiceHoverEdge = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
