@@ -77,6 +77,20 @@ const SERVICE_AREAS = [
   "German Village",
 ];
 
+const RECENT_WORK_PLACEHOLDERS = Array.from({ length: 13 }, (_, i) => ({
+  id: `recent-work-${i + 1}`,
+  label: `Recent landscaping project ${i + 1}`,
+  src: `/recent-work/${String(i + 1).padStart(2, "0")}.png`,
+}));
+
+const RECENT_WORK_DESKTOP_ROWS = [
+  [0, 1, 2],
+  [3, 4],
+  [5, 6, 7],
+  [8, 9],
+  [10, 11, 12],
+];
+
 const NAV_ITEMS = [
   { label: "Services", id: "services" },
   { label: "Our Work", id: "work" },
@@ -963,6 +977,97 @@ export default function Home() {
                 {PHONE_DISPLAY}
               </a>
             </span>
+          </div>
+        </div>
+      </section>
+
+      {/* Recent Work Gallery */}
+      <section id="recent-work-gallery" className="border-t border-white/5 bg-[#0c0c0c] px-4 py-20 sm:px-6 sm:py-24">
+        <div className="mx-auto max-w-6xl">
+          <p className="mb-3 text-center text-sm font-semibold uppercase tracking-[0.2em] text-[#39ff14]">
+            OUR WORK
+          </p>
+          <h2 className="mx-auto mb-4 max-w-3xl text-center text-3xl font-bold text-white sm:text-5xl">
+            More of Our Recent Work
+          </h2>
+          <p className="mx-auto mb-10 max-w-3xl text-center text-sm text-zinc-400 sm:mb-14 sm:text-base">
+            Take a look at some of our recent landscaping projects across Columbus and surrounding areas.
+          </p>
+          <div className="mx-auto mb-10 h-px w-24 bg-white/10 sm:mb-14" />
+
+          {/* Mobile: single column */}
+          <div className="grid grid-cols-1 gap-4 sm:hidden">
+            {RECENT_WORK_PLACEHOLDERS.map((item) => (
+              <div key={item.id} className="group">
+                <div className="overflow-hidden rounded-[20px] border border-white/10 bg-[#151515] shadow-lg shadow-black/30 transition-all duration-300 ease-out group-hover:-translate-y-1.5 group-hover:border-[#39ff14]/45 group-hover:shadow-[0_16px_34px_rgba(0,0,0,0.45),0_0_18px_rgba(57,255,20,0.14)]">
+                  <div className="relative aspect-[5/4] overflow-hidden rounded-[20px]">
+                    <img
+                      src={item.src}
+                      alt={item.label}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Tablet: clean 2-column layout */}
+          <div className="hidden grid-cols-2 gap-5 sm:grid lg:hidden">
+            {RECENT_WORK_PLACEHOLDERS.map((item) => (
+              <div key={item.id} className="group">
+                <div className="overflow-hidden rounded-[22px] border border-white/10 bg-[#151515] shadow-lg shadow-black/30 transition-all duration-300 ease-out group-hover:-translate-y-1.5 group-hover:border-[#39ff14]/45 group-hover:shadow-[0_16px_34px_rgba(0,0,0,0.45),0_0_18px_rgba(57,255,20,0.14)]">
+                  <div className="relative aspect-[5/4] overflow-hidden rounded-[22px]">
+                    <img
+                      src={item.src}
+                      alt={item.label}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: premium staggered 3/2/3/2/3 collage */}
+          <div className="hidden space-y-6 lg:block">
+            {RECENT_WORK_DESKTOP_ROWS.map((row, rowIndex) => (
+              <div
+                key={`row-${rowIndex}`}
+                className={`mx-auto flex gap-6 ${row.length === 2 ? "max-w-4xl justify-center" : "max-w-6xl justify-center"}`}
+              >
+                {row.map((cardIndex) => {
+                  const item = RECENT_WORK_PLACEHOLDERS[cardIndex];
+                  return (
+                    <div key={item.id} className="group w-full max-w-[340px] flex-1">
+                      <div className="overflow-hidden rounded-[22px] border border-white/10 bg-[#151515] shadow-lg shadow-black/30 transition-all duration-300 ease-out group-hover:-translate-y-1.5 group-hover:border-[#39ff14]/45 group-hover:shadow-[0_16px_34px_rgba(0,0,0,0.45),0_0_18px_rgba(57,255,20,0.14)]">
+                        <div className="relative aspect-[5/4] overflow-hidden rounded-[22px]">
+                          <img
+                            src={item.src}
+                            alt={item.label}
+                            loading="lazy"
+                            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-14 flex flex-col items-center text-center">
+            <p className="mb-4 text-sm text-zinc-400">Like what you see?</p>
+            <button
+              type="button"
+              onClick={() => setQuoteFormOpen(true)}
+              className="inline-flex items-center justify-center rounded-lg border border-white/25 px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.02] hover:border-[#39ff14]/60 hover:text-[#39ff14]"
+            >
+              Get Free Quote
+            </button>
           </div>
         </div>
       </section>
