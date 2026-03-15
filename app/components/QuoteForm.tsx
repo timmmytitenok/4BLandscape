@@ -202,7 +202,7 @@ export default function QuoteForm({
 
       {/* Form content - centered, shifted up slightly */}
       <div className="flex min-h-0 flex-1 overflow-y-auto">
-        <div className="flex min-h-full flex-1 flex-col items-center justify-center px-3 py-4 sm:px-6 sm:py-16 sm:-translate-y-8">
+        <div className="flex min-h-full flex-1 flex-col items-center justify-start px-3 pt-15 pb-6 sm:justify-center sm:px-6 sm:pt-16 sm:pb-16 sm:-translate-y-8">
           {isSubmitting ? (
             <div className="flex flex-col items-center justify-center gap-4 sm:gap-6">
               <div className="h-12 w-12 animate-spin rounded-full border-2 border-white/20 border-t-[#39ff14] sm:h-14 sm:w-14" />
@@ -590,7 +590,7 @@ function Step5({
         <div className="mt-4 border-t border-white/15 pt-4 sm:mt-8 sm:pt-8">
           <label className="mb-1.5 block text-left text-xs font-medium text-zinc-500 sm:mb-2 sm:text-sm">Residential or commercial?</label>
           <div className="flex gap-2 sm:gap-4">
-            <button
+            <button 
               type="button"
               onClick={() => updateForm("propertyType", "residential")}
               className={`flex-1 rounded border px-3 py-2.5 text-center text-sm font-medium transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] sm:px-4 sm:py-3.5 ${
