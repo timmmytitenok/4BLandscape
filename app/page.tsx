@@ -101,6 +101,7 @@ const NAV_ITEMS = [
 export default function Home() {
   const [workVisible, setWorkVisible] = useState(false);
   const [workToggledIds, setWorkToggledIds] = useState<Set<string>>(new Set());
+  const [workTappedIds, setWorkTappedIds] = useState<Set<string>>(new Set());
   const [serviceTitle, setServiceTitle] = useState({
     current: SERVICE_GALLERY_ITEMS[0]?.text ?? "Services",
     exiting: null as string | null,
@@ -150,6 +151,10 @@ export default function Home() {
   const [serviceButtonOpacity, setServiceButtonOpacity] = useState({ left: 0, right: 0 });
   const [heroReady, setHeroReady] = useState(false);
   const [quoteFormOpen, setQuoteFormOpen] = useState(false);
+  const currentServiceIndex = SERVICE_GALLERY_ITEMS.findIndex(
+    (item) => item.text.trim() === currentServiceName.trim()
+  );
+  const mobileServiceProgress = `${(currentServiceIndex >= 0 ? currentServiceIndex : 0) + 1}/${SERVICE_GALLERY_ITEMS.length}`;
   const workSectionRef = useRef<HTMLElement | null>(null);
   const heroLoadRef = useRef<HTMLDivElement | null>(null);
   const serviceGalleryRef = useRef<{ nudgeLeft: () => void; nudgeRight: () => void } | null>(null);
@@ -167,6 +172,17 @@ export default function Home() {
       else next.add(id);
       return next;
     });
+    setWorkTappedIds((prev) => {
+      if (prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  };
+
+  const getMobileWorkTag = (id: string) => {
+    if (!workTappedIds.has(id)) return "Tap to reveal";
+    return workToggledIds.has(id) ? "After" : "Before";
   };
 
   useEffect(() => {
@@ -553,6 +569,10 @@ export default function Home() {
           </button>
         </div>
 
+        <p className="mt-4 mb-2 text-center text-[11px] font-semibold tracking-wide text-zinc-400 sm:hidden">
+          {mobileServiceProgress}
+        </p>
+
         <div
           className="service-mobile-title relative mt-9 min-h-[2.75rem] text-center text-2xl font-bold leading-tight text-white sm:hidden"
           aria-live="polite"
@@ -666,8 +686,8 @@ export default function Home() {
                     workToggledIds.has("work-1") ? "opacity-100" : "opacity-0"
                   } sm:group-hover:scale-100 sm:group-hover:opacity-100 sm:group-hover:brightness-90`}
                 />
-                <div className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-200 sm:hidden">
-                  {workToggledIds.has("work-1") ? "After" : "Before"}
+                <div className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-200 whitespace-nowrap sm:hidden">
+                  {workTappedIds.has("work-1") ? getMobileWorkTag("work-1") : "Tap to reveal"}
                 </div>
                 <div className="pointer-events-none absolute bottom-3 left-3 hidden rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200 sm:block">
                   Press or hover to reveal after
@@ -695,8 +715,8 @@ export default function Home() {
                     workToggledIds.has("work-2") ? "opacity-100" : "opacity-0"
                   } sm:group-hover:scale-100 sm:group-hover:opacity-100 sm:group-hover:brightness-90`}
                 />
-                <div className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-200 sm:hidden">
-                  {workToggledIds.has("work-2") ? "After" : "Before"}
+                <div className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-200 whitespace-nowrap sm:hidden">
+                  {workTappedIds.has("work-2") ? getMobileWorkTag("work-2") : "Tap to reveal"}
                 </div>
                 <div className="pointer-events-none absolute bottom-3 left-3 hidden rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200 sm:block">
                   Press or hover to reveal after
@@ -724,8 +744,8 @@ export default function Home() {
                     workToggledIds.has("work-3") ? "opacity-100" : "opacity-0"
                   } sm:group-hover:scale-100 sm:group-hover:opacity-100 sm:group-hover:brightness-90`}
                 />
-                <div className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-200 sm:hidden">
-                  {workToggledIds.has("work-3") ? "After" : "Before"}
+                <div className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-200 whitespace-nowrap sm:hidden">
+                  {workTappedIds.has("work-3") ? getMobileWorkTag("work-3") : "Tap to reveal"}
                 </div>
                 <div className="pointer-events-none absolute bottom-3 left-3 hidden rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200 sm:block">
                   Press or hover to reveal after
@@ -753,8 +773,8 @@ export default function Home() {
                     workToggledIds.has("work-4") ? "opacity-100" : "opacity-0"
                   } sm:group-hover:opacity-100 sm:group-hover:brightness-90`}
                 />
-                <div className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-200 sm:hidden">
-                  {workToggledIds.has("work-4") ? "After" : "Before"}
+                <div className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-200 whitespace-nowrap sm:hidden">
+                  {workTappedIds.has("work-4") ? getMobileWorkTag("work-4") : "Tap to reveal"}
                 </div>
                 <div className="pointer-events-none absolute bottom-3 left-3 hidden rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200 sm:block">
                   Press or hover to reveal after
@@ -782,8 +802,8 @@ export default function Home() {
                     workToggledIds.has("work-5") ? "opacity-100" : "opacity-0"
                   } sm:group-hover:opacity-100 sm:group-hover:brightness-90`}
                 />
-                <div className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-200 sm:hidden">
-                  {workToggledIds.has("work-5") ? "After" : "Before"}
+                <div className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-200 whitespace-nowrap sm:hidden">
+                  {workTappedIds.has("work-5") ? getMobileWorkTag("work-5") : "Tap to reveal"}
                 </div>
                 <div className="pointer-events-none absolute bottom-3 left-3 hidden rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200 sm:block">
                   Press or hover to reveal after
@@ -811,8 +831,8 @@ export default function Home() {
                     workToggledIds.has("work-6") ? "opacity-100" : "opacity-0"
                   } sm:group-hover:opacity-100 sm:group-hover:brightness-90`}
                 />
-                <div className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-200 sm:hidden">
-                  {workToggledIds.has("work-6") ? "After" : "Before"}
+                <div className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-200 whitespace-nowrap sm:hidden">
+                  {workTappedIds.has("work-6") ? getMobileWorkTag("work-6") : "Tap to reveal"}
                 </div>
                 <div className="pointer-events-none absolute bottom-3 left-3 hidden rounded-full border border-white/15 bg-black/55 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-200 sm:block">
                   Press or hover to reveal after
@@ -1158,7 +1178,7 @@ export default function Home() {
             href="https://stratovabuilds.com/"
             target="_blank"
             rel="noreferrer"
-            className="mt-2 text-[11px] text-zinc-600 transition-all duration-300 hover:text-zinc-400"
+            className="hidden mt-2 text-[11px] text-zinc-600 transition-all duration-300 hover:text-zinc-400"
           >
             Website designed by <span className="normal-case text-zinc-400 hover:text-[#39ff14]">STRATOVA</span>
           </a>
